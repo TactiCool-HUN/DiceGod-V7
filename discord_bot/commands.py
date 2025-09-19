@@ -49,6 +49,7 @@ async def emoji_command(ctx: discord.ext.commands.Context):
 	t.ic(ctx.message.clean_content)
 
 
+# noinspection SpellCheckingInspection
 @bot.command(name = 'roll', aliases = ['r', 'e', 'rollthosegoddamndicealready', 'rtgdda'])
 async def roll_command(ctx: discord.ext.commands.Context, *, text):
 	await roller.roll_initiation(ctx, text)
