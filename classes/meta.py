@@ -5,7 +5,7 @@ from utils.bot_setup import bot
 
 
 class Person:
-	def __init__(self, identifier: str | int | discord.User | discord.Member = None, db_id: int = -1, **kwargs):
+	def __init__(self, identifier: str | int | discord.ext.commands.Context | discord.Interaction | discord.User | discord.Member = None, db_id: int = -1, **kwargs):
 		"""
 		:param identifier: str (user_name in db) | int (discord id) | discord.User | discord.Member
 		:param db_id:
@@ -40,7 +40,12 @@ class Person:
 				)
 			)
 
-	def _load(self, identifier: str | int | discord.User | discord.Member, **kwargs):
+	def _load(self, identifier: str | int | discord.ext.commands.Context | discord.Interaction | discord.User | discord.Member, **kwargs):
+		if isinstance(identifier, discord.Interaction):
+			identifier = identifier.user
+		if isinstance(identifier, discord.ext.commands.Context):
+			identifier = identifier.author
+		
 		if self.db_id != -1:
 			with DatabaseConnection('data') as con:
 				cursor = con.cursor()
@@ -106,7 +111,8 @@ class Person:
 		if raw[2]:
 			self.user: discord.User = bot.get_user(raw[2])
 		self.permission_level = cms.PermissionLevel(raw[3], **kwargs)
-		self.settings.set_color(raw[4])
+		if raw[4]:
+			self.settings.set_color(raw[4])
 
 	def update(self):
 		with DatabaseConnection('data') as con:

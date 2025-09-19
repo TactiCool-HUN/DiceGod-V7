@@ -1,6 +1,6 @@
 import discord.ext
 from discord.ext.commands import param
-
+from utils.bot_setup import bot
 import utils.tools_discord as td
 import classes.dicebot as cd
 
@@ -12,17 +12,18 @@ async def roll_initiation(
 	text = text.lower().replace(' ', '').replace('\\', '')
 
 	if text[:4] in ['coinflip', 'coin']:
-		return  # TODO
+		if isinstance(identifier, discord.Interaction):
+			from discord_bot.commands import coin_slash
+			await coin_slash(identifier)
+		else:
+			command = bot.get_command('coinflip')
+			# noinspection PyTypeChecker
+			await identifier.invoke(command)
+		return
 
 	async with td.Load(interaction = identifier, text = text):
 		roll_pack = roll_resolve(text)
 		await td.send_roll(identifier, roll_pack)
-
-	if isinstance(identifier, discord.Interaction):
-		identifier: discord.Interaction
-	else:
-		identifier: discord.ext.commands.Context
-
 		
 
 def roll_resolve(roll_text_og: str):

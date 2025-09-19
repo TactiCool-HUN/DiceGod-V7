@@ -5,12 +5,12 @@ import utils.tools as t
 
 
 async def send_message(
-		identifier: discord.Message | discord.Interaction | discord.ext.commands.Context | discord.Member | cm.Person,
+		identifier: discord.TextChannel | discord.Message | discord.Interaction | discord.ext.commands.Context | discord.Member | cm.Person,
 		text: str = '',
 		**kwargs
 ) -> discord.Message:
 	"""
-	:param identifier: message | interaction | context | member | person
+	:param identifier: TextChannel | Message | Interaction | Context | Member | Person
 	:param text: str
 	:key ephemeral: bool
 	:key reply: bool
@@ -23,6 +23,7 @@ async def send_message(
 	reply: bool = kwargs.get('reply', False)
 	silent: bool = kwargs.get('silent', True)
 	embed: discord.Embed | None = kwargs.get('embed', None)
+	poll: discord.Poll | None = kwargs.get('poll', None)
 	edit_original_response: bool = kwargs.get('edit_original_response', False)
 
 	match type(identifier):
@@ -33,19 +34,22 @@ async def send_message(
 				sent: discord.Message = await identifier.response.send_message(
 					content = text,
 					embed = embed,
+					poll = poll,
 					silent = silent,
-					ephemeral = ephemeral
+					ephemeral = ephemeral,
 				)
 			except discord.InteractionResponded:
 				if edit_original_response:
 					sent: discord.Message = await identifier.edit_original_response(
 						content = text,
 						embed = embed,
+						poll = poll,
 					)
 				else:
 					sent: discord.Message = await identifier.followup.send_message(
 						content = text,
 						embed = embed,
+						poll = poll,
 						silent = silent,
 						ephemeral = ephemeral
 					)
@@ -59,12 +63,14 @@ async def send_message(
 				sent: discord.Message = await identifier.reply(
 					content = text,
 					embed = embed,
+					poll = poll,
 					silent = silent
 				)
 			else:
 				sent: discord.Message = await identifier.send(
 					content = text,
 					embed = embed,
+					poll = poll,
 					silent = silent
 				)
 		case discord.User | discord.Member | cm.Person:
@@ -77,6 +83,15 @@ async def send_message(
 			sent: discord.Message = await channel.send(
 				content = text,
 				embed = embed,
+				poll = poll,
+				silent = silent
+			)
+		case discord.TextChannel:
+			identifier: discord.TextChannel
+			sent: discord.Message = await identifier.send(
+				content = text,
+				embed = embed,
+				poll = poll,
 				silent = silent
 			)
 		case _:
@@ -128,7 +143,7 @@ async def send_roll(
 	embed = discord.Embed(
 		title = title,
 		description = description,
-		color = cm.Person(identifier.author).settings.color
+		color = cm.Person(identifier).settings.color
 	)
 	
 	await send_message(

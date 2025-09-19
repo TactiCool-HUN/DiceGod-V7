@@ -1,12 +1,19 @@
 from databases.database_handler import DatabaseConnection
-from utils.discord_vote import Vote
+from utils.followup import followup
 from utils.bot_setup import bot
-import utils.tools_discord as td
 import utils.tools as t
+import utils.tools_discord as td
 import classes.meta as cm
+import classes.utility as cu
 import roller
 import asyncio
 import discord
+
+
+@bot.command(name = 'test')
+async def test(ctx: discord.ext.commands.Context):
+	if cm.Person(ctx).permission_level < 4:
+		return
 
 
 @bot.command(name = 'ping')
@@ -40,7 +47,7 @@ async def emoji_command(ctx: discord.ext.commands.Context):
 	t.ic(ctx.message.clean_content)
 
 
-@bot.command(name = 'roll', aliases = ['r', 'e', 'rollthosegoddamndicealready'])
+@bot.command(name = 'roll', aliases = ['r', 'e', 'rollthosegoddamndicealready', 'rtgdda'])
 async def roll(ctx: discord.ext.commands.Context, *, text):
 	await roller.roll_initiation(ctx, text)
 
@@ -58,9 +65,9 @@ async def coin_old(ctx: discord.ext.commands.Context):
 @bot.tree.command(name = 'coinflip', description = 'Flip a coin! (such complexity, but hey if you read it here is a tip: -coin has 1% more tails)')
 async def coin_slash(interaction: discord.Interaction):
 	response_list = {
-		f"{cm.Person(interaction.user).user.display_name} flipped a coin and it landed on... it's side?": 1,
-		f"{cm.Person(interaction.user).user.display_name} flipped a coin and it landed on **heads**!": 51,
-		f"{cm.Person(interaction.user).user.display_name} flipped a coin and it landed on **tails**!": 49
+		f"{cm.Person(interaction).user.display_name} flipped a coin and it landed on... it's side?": 1,
+		f"{cm.Person(interaction).user.display_name} flipped a coin and it landed on **heads**!": 51,
+		f"{cm.Person(interaction).user.display_name} flipped a coin and it landed on **tails**!": 49
 	}
 	await td.send_message(interaction, text = t.choice(response_list))
 
@@ -68,7 +75,7 @@ async def coin_slash(interaction: discord.Interaction):
 @bot.tree.command(name = 'settings', description = 'Set your T(h)ings!')
 @discord.app_commands.describe(color = "Set your color! (use #000000 or 0x000000 hex code)")
 async def settings(interaction: discord.Interaction, color: str):
-	person = cm.Person(interaction.user).settings.set_color(color)
+	person = cm.Person(interaction).settings.set_color(color)
 	person.update()
 
 
@@ -76,7 +83,7 @@ async def settings(interaction: discord.Interaction, color: str):
 @bot.tree.command(name = 'titles', description = 'Check someone\'s titles!')
 @discord.app_commands.describe(person = '@ the person (optional)')
 async def titles_request(interaction: discord.Interaction, person: discord.User = None):
-	author = cm.Person(interaction.user)
+	author = cm.Person(interaction)
 	if person is None:
 		person = author
 		ephemeral = True
@@ -116,13 +123,13 @@ async def titles_request(interaction: discord.Interaction, person: discord.User 
 	await td.send_message(person, '', embed = embed, ephemeral = ephemeral)
 
 
-@bot.tree.command(name = 'Award Title', description = 'Open a vote for someone to gain a title.')
+@bot.tree.command(name = 'award-title', description = 'Open a vote for someone to gain a title.')
 @discord.app_commands.describe(title = 'Write the title here!')
-@discord.app_commands.describe(person = '@ the person')
+@discord.app_commands.describe(target = '@ the person')
 @discord.app_commands.describe(is_major = 'Yes for Major, No for Minor title')
 @discord.app_commands.describe(avoid_vote = 'Admin Only')
 async def award_title(interaction: discord.Interaction, title: str, target: discord.User, is_major: bool, avoid_vote: bool = True):
-	person = cm.Person(interaction.user)
+	person = cm.Person(interaction)
 	target = cm.Person(target, is_banned_allowed = True)
 	if target.permission_level < 0:
 		await td.send_message(interaction, f"Can't apply title to {target.user.display_name} as they are banned from bot interactions.", ephemeral = True)
@@ -138,10 +145,29 @@ async def award_title(interaction: discord.Interaction, title: str, target: disc
 		await td.send_message(interaction, f"Applied.", ephemeral = True)
 		return
 
-	Vote(options = {
-		'Yes': [_force_title, title, target, tier],
-		'No': 'built_in=disable_self'
-	})
+	await followup(
+		interaction,
+		'poll',
+		f"{person.user.mention} has called a vote to add the ``{title}`` {tier} title to {target.user.mention}.", 
+		question = 'Are you in support?',
+		options = {
+			'Yes': cu.FollowupAction(
+				'function',
+				_force_title,
+				[title, target, tier]
+			),
+			'No': cu.FollowupAction(
+				'built-in',
+				'disable-self'
+			),
+			f'Veto (only for admins and {target.user.display_name})': cu.FollowupAction(
+				'built-in',
+				'disable-self',
+				power = 'veto',
+			),
+		},
+		veto_power = [target]
+	)
 
 
 def _force_title(title: str, target: cm.Person, tier: str):

@@ -17,7 +17,8 @@ class PermissionLevel:
 			'guest': 0,
 			'registered': 1,
 			'trusted': 2,
-			'admin': 3
+			'admin': 3,
+			'creator': 4
 		}
 		self._int_to_str: dict[int, str] = {v: k for k, v in self._str_to_int.items()}
 		# ----------------------------

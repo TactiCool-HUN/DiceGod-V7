@@ -39,7 +39,7 @@ with DatabaseConnection('data') as connection:
 		'name text,'
 		'discord_id integer,'
 		'permission_level integer default 0,'
-		'color text default "000000",'
+		'color text default "0x000000",'
 		'PRIMARY KEY (id),'
 		'UNIQUE (discord_id)'
 		')'
@@ -51,6 +51,7 @@ with DatabaseConnection('data') as connection:
 		'person_id integer not null,'
 		'tier text not null,'
 		'PRIMARY KEY (title)'
+		')'
 	)
 
 	# add base colors
