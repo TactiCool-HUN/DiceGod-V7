@@ -110,7 +110,10 @@ async def send_roll(
 	builder = []
 	for part in roll_summary:
 		if part.type == 'operator':
-			builder.append(f'**{part}**')
+			if part == '-':
+				builder.append(':no_entry:')
+			else:
+				builder.append(f'**{part}**')
 		else:
 			builder.append(t.num2emoji(int(part.value)))
 			if part.damage_type is not None:
@@ -119,11 +122,13 @@ async def send_roll(
 	title = f'**Roll Result:** {"".join(builder)}'
 	
 	description = roll_recursive_builder(roll_pieces)[1:-1].replace('*', '\*')
+	if description[0] == '-':
+		description = '\\' + description
 	
 	embed = discord.Embed(
 		title = title,
 		description = description,
-		#color = color
+		color = cm.Person(identifier.author).settings.color
 	)
 	
 	await send_message(
@@ -133,20 +138,33 @@ async def send_roll(
 	)
 
 
-class DeferInteraction:
+class Load:
 	"""
-	Displays loading or error messages on slash commands even through exceptions.
+	Displays loading, sends error message before throwing the exception
 	"""
-	def __init__(self, interaction: discord.Interaction):
+	def __init__(self, interaction: discord.Interaction | discord.ext.commands.Context, text: str):
 		self.interaction = interaction
+		self.text = text
 
 	async def __aenter__(self):
-		# noinspection PyUnresolvedReferences
-		await self.interaction.response.defer()
+		if isinstance(self.interaction, discord.Interaction):
+			# noinspection PyUnresolvedReferences
+			await self.interaction.response.defer()
+		else:
+			self.message = await send_message(self.interaction, f'``LOADING``\n``{self.text}``')
 
 	async def __aexit__(self, exc_type, exc_val, exc_tb):
+		error = f'DiceGod encountered an error during the processing of:\n``{self.text}``.\n```py\n{exc_type}```Error value```py\n{exc_val}```'
 		if exc_type is not None:
-			await self.interaction.edit_original_response(content = f'DiceGod encountered an error.\n```py\n{exc_type}```Error value```py\n{exc_val}```')
+			if isinstance(self.interaction, discord.Interaction):
+				await self.interaction.edit_original_response(content = error)
+			else:
+				await self.message.edit(content = error)
+		else:
+			if isinstance(self.interaction, discord.Interaction):
+				pass
+			else:
+				await self.message.delete()
 
 
 pass

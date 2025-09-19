@@ -1,6 +1,12 @@
+import discord
+
+
 class PersonalSettings:
 	def __init__(self):
-		self.color: int | None = None
+		self.color: discord.Color | None = None
+
+	def set_color(self, string: str):
+		self.color = discord.Color.from_str(string)
 
 
 class PermissionLevel:

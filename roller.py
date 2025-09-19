@@ -10,23 +10,19 @@ async def roll_initiation(
 		text: str
 ):
 	text = text.lower().replace(' ', '').replace('\\', '')
-	
+
+	if text[:4] in ['coinflip', 'coin']:
+		return  # TODO
+
+	async with td.Load(interaction = identifier, text = text):
+		roll_pack = roll_resolve(text)
+		await td.send_roll(identifier, roll_pack)
+
 	if isinstance(identifier, discord.Interaction):
 		identifier: discord.Interaction
-		with td.DeferInteraction(interaction = identifier):
-			roll_pack = roll_resolve(text)
-			await td.send_roll(identifier, roll_pack)
 	else:
 		identifier: discord.ext.commands.Context
-		if text[:4] in ['coinflip', 'coin']:
-			return  # TODO
-		
-		try:
-			roll_pack = roll_resolve(text)
-			await td.send_roll(identifier, roll_pack)
-		except Exception as e:
-			await td.send_message(identifier, str(e))
-			raise e
+
 		
 
 def roll_resolve(roll_text_og: str):
@@ -119,10 +115,13 @@ def create_dice(roll_pieces: list[cd.RollPiece]) -> list[cd.RollPiece]:
 				raise ValueError(f'Unexpected non-numeric value next to operational \'d\'!\nValue: {roll_pieces[i + 1]}')
 			
 			die = cd.Die(amount, size)
-			if roll_pieces[i + 2].type == 'roll_modifier':
-				die.modifiers = roll_pieces[i + 2].value
-				roll_pieces = roll_pieces[:i - 1] + [cd.RollPiece('die', die)] + roll_pieces[i + 3:]
-			else:
+			try:
+				if roll_pieces[i + 2].type == 'roll_modifier':
+					die.modifiers = roll_pieces[i + 2].value
+					roll_pieces = roll_pieces[:i - 1] + [cd.RollPiece('die', die)] + roll_pieces[i + 3:]
+				else:
+					roll_pieces = roll_pieces[:i - 1] + [cd.RollPiece('die', die)] + roll_pieces[i + 2:]
+			except IndexError:
 				roll_pieces = roll_pieces[:i - 1] + [cd.RollPiece('die', die)] + roll_pieces[i + 2:]
 			return create_dice(roll_pieces)
 

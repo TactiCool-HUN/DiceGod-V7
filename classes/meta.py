@@ -17,12 +17,32 @@ class Person:
 
 		self.permission_level: cms.PermissionLevel | None = None
 		self.settings: cms.PersonalSettings = cms.PersonalSettings()
-		
+
 		self._load(identifier, **kwargs)
-	
+
+	def _new(self):
+		if self.user is not None:
+			user_id = self.user.id
+			self.user_name = self.user.name
+		else:
+			user_id = None
+
+		with DatabaseConnection('data') as con:
+			cursor = con.cursor()
+			cursor.execute(
+				'INSERT INTO people('
+				'name,'
+				'discord_id'
+				') VALUES (?, ?)',
+				(
+					self.user_name,
+					user_id
+				)
+			)
+
 	def _load(self, identifier: str | int | discord.User | discord.Member, **kwargs):
 		if self.db_id != -1:
-			with DatabaseConnection('meta') as con:
+			with DatabaseConnection('data') as con:
 				cursor = con.cursor()
 				cursor.execute(
 					'SELECT * FROM people WHERE id = ?',
@@ -33,7 +53,7 @@ class Person:
 			if len(raw) > 1:
 				raise ValueError('Too many People found in database.')
 			elif len(raw) == 0:
-				raise ValueError('Person does not exist in database.')
+				raise ValueError(f'Person does not exist in database. (tried to load person from db_id: {self.db_id})')
 		else:
 			if isinstance(identifier, str):
 				self.user_name = identifier
@@ -54,15 +74,15 @@ class Person:
 				)
 
 			if self.user_name:
-				with DatabaseConnection('meta') as con:
+				with DatabaseConnection('data') as con:
 					cursor = con.cursor()
 					cursor.execute(
-						'SELECT * FROM people WHERE user_name = ?',
+						'SELECT * FROM people WHERE name = ?',
 						(self.user_name,)
 					)
 					raw: list[list] = cursor.fetchall()
 			else:
-				with DatabaseConnection('meta') as con:
+				with DatabaseConnection('data') as con:
 					cursor = con.cursor()
 					cursor.execute(
 						'SELECT * FROM people WHERE discord_id = ?',
@@ -86,7 +106,22 @@ class Person:
 		if raw[2]:
 			self.user: discord.User = bot.get_user(raw[2])
 		self.permission_level = cms.PermissionLevel(raw[3], **kwargs)
-		self.active_character = raw[4]
-		self.settings.color = raw[5]
+		self.settings.set_color(raw[4])
+
+	def update(self):
+		with DatabaseConnection('data') as con:
+			cursor = con.cursor()
+			cursor.execute(
+				'UPDATE people '
+				'SET permission_level = ?, '
+				'color = ? '
+				'WHERE id = ?',
+				(
+					int(self.permission_level),
+					str(self.settings.color),
+					self.db_id
+				)
+			)
+
 
 pass

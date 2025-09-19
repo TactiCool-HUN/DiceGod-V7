@@ -1,3 +1,5 @@
+from databases.database_handler import DatabaseConnection
+from utils.discord_vote import Vote
 from utils.bot_setup import bot
 import utils.tools_discord as td
 import utils.tools as t
@@ -51,3 +53,110 @@ async def coin_old(ctx: discord.ext.commands.Context):
 		f"{cm.Person(ctx).user.display_name} flipped a coin and it landed on **tails**!": 51
 	}
 	await td.send_message(ctx, text = t.choice(response_list))
+
+
+@bot.tree.command(name = 'coinflip', description = 'Flip a coin! (such complexity, but hey if you read it here is a tip: -coin has 1% more tails)')
+async def coin_slash(interaction: discord.Interaction):
+	response_list = {
+		f"{cm.Person(interaction.user).user.display_name} flipped a coin and it landed on... it's side?": 1,
+		f"{cm.Person(interaction.user).user.display_name} flipped a coin and it landed on **heads**!": 51,
+		f"{cm.Person(interaction.user).user.display_name} flipped a coin and it landed on **tails**!": 49
+	}
+	await td.send_message(interaction, text = t.choice(response_list))
+
+
+@bot.tree.command(name = 'settings', description = 'Set your T(h)ings!')
+@discord.app_commands.describe(color = "Set your color! (use #000000 or 0x000000 hex code)")
+async def settings(interaction: discord.Interaction, color: str):
+	person = cm.Person(interaction.user).settings.set_color(color)
+	person.update()
+
+
+
+@bot.tree.command(name = 'titles', description = 'Check someone\'s titles!')
+@discord.app_commands.describe(person = '@ the person (optional)')
+async def titles_request(interaction: discord.Interaction, person: discord.User = None):
+	author = cm.Person(interaction.user)
+	if person is None:
+		person = author
+		ephemeral = True
+	else:
+		person = cm.Person(person)
+		ephemeral = False
+
+	with DatabaseConnection('data') as con:
+		cursor = con.cursor()
+		cursor.execute(
+			'SELECT title FROM titles WHERE person_id = ?',
+			(
+				person.db_id,
+			)
+		)
+		raw = cursor.fetchall()
+
+	embed = discord.Embed(
+		title = f'Titles of {person.user_name}',
+		description = None,
+		color = person.settings.color
+	)
+
+	major_titles = []
+	minor_titles = []
+	for line in raw:
+		if line[2] == 'major':
+			major_titles.append(line[0])
+		else:
+			minor_titles.append(line[0])
+
+	if major_titles:
+		embed.add_field(name = 'Major Titles:', value = '\n'.join(major_titles))
+	if minor_titles:
+		embed.add_field(name = 'Minor Titles:', value = '\n'.join(minor_titles))
+
+	await td.send_message(person, '', embed = embed, ephemeral = ephemeral)
+
+
+@bot.tree.command(name = 'Award Title', description = 'Open a vote for someone to gain a title.')
+@discord.app_commands.describe(title = 'Write the title here!')
+@discord.app_commands.describe(person = '@ the person')
+@discord.app_commands.describe(is_major = 'Yes for Major, No for Minor title')
+@discord.app_commands.describe(avoid_vote = 'Admin Only')
+async def award_title(interaction: discord.Interaction, title: str, target: discord.User, is_major: bool, avoid_vote: bool = True):
+	person = cm.Person(interaction.user)
+	target = cm.Person(target, is_banned_allowed = True)
+	if target.permission_level < 0:
+		await td.send_message(interaction, f"Can't apply title to {target.user.display_name} as they are banned from bot interactions.", ephemeral = True)
+		return
+
+	if is_major:
+		tier = 'major'
+	else:
+		tier = 'minor'
+
+	if person.permission_level > 2 and avoid_vote:
+		_force_title(title, target, tier)
+		await td.send_message(interaction, f"Applied.", ephemeral = True)
+		return
+
+	Vote(options = {
+		'Yes': [_force_title, title, target, tier],
+		'No': 'built_in=disable_self'
+	})
+
+
+def _force_title(title: str, target: cm.Person, tier: str):
+	with DatabaseConnection('data') as con:
+		cursor = con.cursor()
+		cursor.execute(
+			'INSERT INTO titles('
+			'title,'
+			'person_id,'
+			'tier) VALUES (?, ?, ?)',
+			(
+				title,
+				target.db_id,
+				tier
+			)
+		)
+
+pass

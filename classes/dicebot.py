@@ -65,14 +65,11 @@ class Die:
 		self.is_resolved = True
 	
 	def __repr__(self):
-		if self.is_resolved:
-			return f'Die({self.total}({self.amount}d{self.size}{self.modifiers}))'
-		else:
-			return f'Die({self.amount}d{self.size}{self.modifiers})'
+		return f'Die({str(self)})'
 	
 	def __str__(self):
 		if self.is_resolved:
-			return f'{self.total}({self.amount}d{self.size}{self.modifiers})'
+			return f'{self.total} [{self.amount}d{self.size}{self.modifiers}]'
 		else:
 			return f'{self.amount}d{self.size}{self.modifiers}'
 	
