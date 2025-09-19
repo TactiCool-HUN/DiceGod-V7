@@ -8,11 +8,13 @@ import classes.utility as cu
 import roller
 import asyncio
 import discord
+import discord.ext
 
 
 @bot.command(name = 'test')
 async def test(ctx: discord.ext.commands.Context):
 	if cm.Person(ctx).permission_level < 4:
+		t.ic(cm.Person(ctx))
 		return
 
 
@@ -48,8 +50,15 @@ async def emoji_command(ctx: discord.ext.commands.Context):
 
 
 @bot.command(name = 'roll', aliases = ['r', 'e', 'rollthosegoddamndicealready', 'rtgdda'])
-async def roll(ctx: discord.ext.commands.Context, *, text):
+async def roll_command(ctx: discord.ext.commands.Context, *, text):
 	await roller.roll_initiation(ctx, text)
+
+
+@bot.tree.command(name = 'roll-multi', description = 'Roll the same dice multiple times.')
+@discord.app_commands.describe(multiplier = 'how many times?')
+@discord.app_commands.describe(roll = 'roll expression')
+async def multi_roll(interaction: discord.Interaction, multiplier: int, roll: str):
+	await roller.roll_initiation(interaction, roll, multiplier)
 
 
 @bot.command(name = 'coinflip', aliases = ['coin', 'c'])
@@ -184,5 +193,6 @@ def _force_title(title: str, target: cm.Person, tier: str):
 				tier
 			)
 		)
+
 
 pass

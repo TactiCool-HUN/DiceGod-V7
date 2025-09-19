@@ -1,5 +1,6 @@
 import classes.meta_support as cms
 import discord
+import discord.ext
 from databases.database_handler import DatabaseConnection
 from utils.bot_setup import bot
 

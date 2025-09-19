@@ -13,8 +13,8 @@ class Die:
 		self.total: int | None = None
 		self.modifiers: str = ''
 		
-	def evaluate(self):
-		if self.is_resolved:
+	def evaluate(self, ignore_resolve_error: bool = False):
+		if self.is_resolved and not ignore_resolve_error:
 			raise ResolvedError()
 		
 		actual_amount = self.amount

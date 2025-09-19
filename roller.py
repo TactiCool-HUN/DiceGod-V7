@@ -7,7 +7,8 @@ import classes.dicebot as cd
 
 async def roll_initiation(
 		identifier: discord.Interaction | discord.ext.commands.Context,
-		text: str
+		text: str,
+		multiplier: int = 1
 ):
 	text = text.lower().replace(' ', '').replace('\\', '')
 
@@ -22,22 +23,23 @@ async def roll_initiation(
 		return
 
 	async with td.Load(interaction = identifier, text = text):
-		roll_pack = roll_resolve(text)
-		await td.send_roll(identifier, roll_pack)
-		
+		roll_pieces: list[cd.RollPiece] = roll_parse(text)
+		if multiplier == 1:
+			roll_pack = [roll_pieces, evaluate(roll_pieces)]
+			await td.send_roll(identifier, roll_pack)
+		else:
+			packed_roll_pack = []
+			for _ in range(multiplier):
+				packed_roll_pack.append([roll_pieces, evaluate(roll_pieces)])
+				await td.send_pack(identifier, packed_roll_pack)
 
-def roll_resolve(roll_text_og: str):
+
+def roll_parse(roll_text_og: str) -> list[cd.RollPiece]:
 	roll_pieces: list[cd.RollPiece] = create_roll_pieces(roll_text_og)
-	
 	roll_pieces = create_dice(roll_pieces)
-	
 	# noinspection PyTypeChecker
 	# my editor is dumb
-	roll_pieces = parentheses_solver(roll_pieces)
-	
-	roll_summary = evaluate(roll_pieces)
-	
-	return [roll_pieces, roll_summary]
+	return parentheses_solver(roll_pieces)
 
 
 def create_roll_pieces(incoming_text: str) -> list[cd.RollPiece]:
@@ -131,7 +133,7 @@ def create_dice(roll_pieces: list[cd.RollPiece]) -> list[cd.RollPiece]:
 	return roll_pieces
 
 
-def parentheses_solver(roll_pieces: list[cd.RollPiece]) -> cd.RollPiece:
+def parentheses_solver(roll_pieces: list[cd.RollPiece]) -> list[cd.RollPiece]:
 	i = 0
 	start = None
 	while i < len(roll_pieces):
@@ -212,7 +214,7 @@ def evaluate(roll_pieces: list[cd.RollPiece]) -> list[cd.RollPiece]:
 
 
 if __name__ == '__main__':
-	roll_resolve('2*(1d20adv-(2*1d4))[void]+5[piercing]+4d4/2')
+	roll_parse('2*(1d20adv-(2*1d4))[void]+5[piercing]+4d4/2')
 
 
 pass

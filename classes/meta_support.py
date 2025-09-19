@@ -11,7 +11,8 @@ class PersonalSettings:
 
 class PermissionLevel:
 	def __init__(self, permission: str | int, **kwargs):
-		# swap between name and number
+		self._permission_level: int = 0
+
 		self._str_to_int: dict[str, int] = {
 			'banned': -1,
 			'guest': 0,
@@ -21,58 +22,56 @@ class PermissionLevel:
 			'creator': 4
 		}
 		self._int_to_str: dict[int, str] = {v: k for k, v in self._str_to_int.items()}
-		# ----------------------------
-
-		if isinstance(permission, str):
-			self._name: str = permission
-			self._num: int = self._str_to_int[self._name]
-		elif isinstance(permission, int):
-			self._num: int = permission
-			self._name: str = self._int_to_str[self._num]
+		
+		self.permission_level = permission
+		if self == -1 and not kwargs.get('is_banned_allowed', False):
+			raise PermissionError('Person is banned. If you want to supress this error pass "is_banned_allowed = True" when initiating the Person of PermissionLevel class.')
+	
+	@property
+	def permission_level(self):
+		return self._permission_level
+	
+	@permission_level.setter
+	def permission_level(self, new_value: int | str):
+		if isinstance(new_value, str):
+			new_value = self._str_to_int[new_value]
+		if isinstance(new_value, int):
+			if self.min() <= new_value <= self.max():
+				self._permission_level = new_value
+			else:
+				raise ValueError(f'PermissionLevel cannot set {new_value} as it is not in the range [{self.min()}, {self.max()}].')
 		else:
 			raise TypeError(f'PermissionLevel can only be initiated with string or integer')
 
-		if self._num == -1 and not kwargs.get('is_banned_allowed', False):
-			raise PermissionError('Person is banned. If you want to supress this error pass "is_banned_allowed = True" when initiating the Person of PermissionLevel class.')
+	def min(self) -> int:
+		return min(self._str_to_int.values())
+	
+	def max(self) -> int:
+		return max(self._str_to_int.values())
 
 	def __str__(self):
-		return self._name
+		return self._int_to_str[self.permission_level]
 
 	def __int__(self):
-		return self._num
+		return self.permission_level
 
 	def __float__(self):
-		return self._num
+		return float(self.permission_level)
 
 	def __lt__(self, other):
-		if isinstance(other, PermissionLevel):
-			return self._num < other._num
-		else:
-			return self._num < other
+		return int(self) < int(other)
 
 	def __le__(self, other):
-		if isinstance(other, PermissionLevel):
-			return self._num <= other._num
-		else:
-			return self._num <= other
+		return int(self) <= int(other)
 
 	def __gt__(self, other):
-		if isinstance(other, PermissionLevel):
-			return self._num > other._num
-		else:
-			return self._num > other
+		return int(self) > int(other)
 
 	def __ge__(self, other):
-		if isinstance(other, PermissionLevel):
-			return self._num >= other._num
-		else:
-			return self._num >= other
+		return int(self) >= int(other)
 
 	def __eq__(self, other):
-		if isinstance(other, PermissionLevel):
-			return self._num == other._num
-		else:
-			return self._num == other or self._name == other
+		return (int(self) == int(other)) or (str(self) == str(other))
 
 	def __ne__(self, other):
 		return not (self == other)

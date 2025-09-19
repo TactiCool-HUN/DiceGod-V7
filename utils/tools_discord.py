@@ -146,11 +146,24 @@ async def send_roll(
 		color = cm.Person(identifier).settings.color
 	)
 	
+	for piece in roll_pieces:
+		if piece.type == 'die':
+			die = piece.value
+			embed.add_field(name = f'{die.amount}d{die.size}', value = '')
+	
 	await send_message(
 		identifier,
 		'',
 		embed = embed
 	)
+
+
+async def send_pack(
+		identifier: discord.Interaction | discord.ext.commands.Context,
+		packed_roll_pack: list[list[list[cd.RollPiece]]]
+):
+	pass
+
 
 
 class Load:
