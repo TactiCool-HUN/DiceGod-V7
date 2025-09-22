@@ -17,6 +17,8 @@ async def test(ctx: discord.ext.commands.Context):
 		t.ic(cm.Person(ctx))
 		return
 
+	cm.Person(ctx).get_titles()
+
 
 @bot.command(name = 'ping')
 async def ping(ctx: discord.ext.commands.Context):
@@ -85,9 +87,9 @@ async def coin_slash(interaction: discord.Interaction):
 @bot.tree.command(name = 'settings', description = 'Set your T(h)ings!')
 @discord.app_commands.describe(color = "Set your color! (use #000000 or 0x000000 hex code)")
 async def settings(interaction: discord.Interaction, color: str):
-	person = cm.Person(interaction).settings.set_color(color)
+	person = cm.Person(interaction)
+	person.settings.color = color
 	person.update()
-
 
 
 @bot.tree.command(name = 'titles', description = 'Check someone\'s titles!')

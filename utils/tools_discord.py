@@ -139,22 +139,39 @@ async def send_roll(
 	description = roll_recursive_builder(roll_pieces)[1:-1].replace('*', '\*')
 	if description[0] == '-':
 		description = '\\' + description
-	
+
+	person = cm.Person(identifier)
+	titles = person.get_titles()
+	if titles:
+		temp = dict()
+		for person_title in titles:
+			temp[person_title[0]] = int(person_title[1] == 'major') + 1
+		temp = t.choice(temp)
+		if temp[:4].lower() == 'the':
+			person_title = f', {temp}'
+		else:
+			person_title = f', The {temp}'
+	else:
+		person_title = ''
+
 	embed = discord.Embed(
 		title = title,
 		description = description,
-		color = cm.Person(identifier).settings.color
+		color = person.settings.color
 	)
 	
 	for piece in roll_pieces:
 		if piece.type == 'die':
 			die = piece.value
 			embed.add_field(name = f'{die.amount}d{die.size}', value = '')
-	
+
+	embed.set_footer(text = f'{person.user.display_name}{person_title}', icon_url = person.user.avatar.url)
+
 	await send_message(
 		identifier,
 		'',
-		embed = embed
+		embed = embed,
+		reply = True
 	)
 
 

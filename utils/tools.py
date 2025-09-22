@@ -155,6 +155,25 @@ def get_damage_type_emoji(damage_type: str) -> str:
 	return DAMAGE_TYPES.get(damage_type)
 
 
+def safe_default_eval(template: str, safe_locals: dict = None):
+	safe_globals = {
+		"__builtins__": {
+			"str": str,
+			"int": int,
+			"float": float,
+			"bool": bool,
+			"dict": dict,
+			"list": list,
+			"tuple": tuple,
+			"set": set,
+		}
+	}
+	if safe_locals is None:
+		safe_locals = dict()
+
+	return eval(template, safe_globals, safe_locals)  # safety-wrapper-eval
+
+
 class ListIterator:
 	"""
 	Just required for some python class construction

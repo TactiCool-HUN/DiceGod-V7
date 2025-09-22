@@ -113,7 +113,9 @@ class Person:
 			self.user: discord.User = bot.get_user(raw[2])
 		self.permission_level = cms.PermissionLevel(raw[3], **kwargs)
 		if raw[4]:
-			self.settings.set_color(raw[4])
+			self.settings.color = raw[4]
+		if raw[5]:
+			self.settings.chat_ignore = raw[5]
 
 	def update(self):
 		with DatabaseConnection('data') as con:
@@ -121,14 +123,25 @@ class Person:
 			cursor.execute(
 				'UPDATE people '
 				'SET permission_level = ?, '
+				'chat_ignore = ?, '
 				'color = ? '
 				'WHERE id = ?',
 				(
 					int(self.permission_level),
+					int(self.settings.chat_ignore),
 					str(self.settings.color),
 					self.db_id
 				)
 			)
+
+	def get_titles(self):
+		with DatabaseConnection('data') as con:
+			cursor = con.cursor()
+			cursor.execute(
+				'SELECT title, tier FROM titles WHERE person_id = ?',
+				(self.db_id,)
+			)
+			return cursor.fetchall()
 
 
 pass

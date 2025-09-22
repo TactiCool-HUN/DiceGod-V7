@@ -22,6 +22,7 @@ class DatabaseConnection:
 # ENSURE TABLES
 with DatabaseConnection('data') as connection:
 	cursor = connection.cursor()
+	cursor.execute("PRAGMA foreign_keys = ON;")
 
 	# - - - colors - - -
 	cursor.execute(
@@ -40,6 +41,7 @@ with DatabaseConnection('data') as connection:
 		'discord_id integer,'
 		'permission_level integer default 0,'
 		'color text default "0x000000",'
+		'chat_ignore integer default 0,'
 		'PRIMARY KEY (id),'
 		'UNIQUE (discord_id)'
 		')'
@@ -51,6 +53,25 @@ with DatabaseConnection('data') as connection:
 		'person_id integer not null,'
 		'tier text not null,'
 		'PRIMARY KEY (title)'
+		')'
+	)
+	# - - - responses - - -
+	cursor.execute(
+		'CREATE TABLE IF NOT EXISTS responses('
+		'id integer,'
+		'response text,'
+		'PRIMARY KEY (id),'
+		'UNIQUE(response)'
+		')'
+	)
+	# - - - con_response_people - - -
+	cursor.execute(
+		'CREATE TABLE IF NOT EXISTS con_response_person('
+		'person_id integer not null,'
+		'response_id integer not null,'
+		'PRIMARY KEY (person_id, response_id),'
+		'FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE, '
+		'FOREIGN KEY (response_id) REFERENCES responses(id) ON DELETE CASCADE'
 		')'
 	)
 
