@@ -1,5 +1,3 @@
-from operator import truediv
-
 import classes.meta_support as cms
 import discord
 import discord.ext

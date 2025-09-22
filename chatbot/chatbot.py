@@ -52,8 +52,8 @@ async def response_director(message: discord.Message):
 		triggered = True
 
 
-	temp = text_rando('{person.get_random_title(True)} has spoken', case_rando = False) + '"'
-	temp2 = text_rando('{person.user.display_name} has spoken', case_rando = False) + '"'
+	temp = text_rando('{random_title(True)} has spoken', case_rando = False) + '"'
+	temp2 = text_rando('{display_name} has spoken', case_rando = False) + '"'
 	if triggered:
 		responses = {
 			text_rando('yes'): int(person.permission_level),
@@ -67,7 +67,10 @@ async def response_director(message: discord.Message):
 
 		response = t.choice(responses)
 		if response[:2] == 'f"':
-			response = t.eval_safe(response, {'person': person})
+			response = t.eval_safe(response, {
+				'random_title': person.get_random_title,
+				'display_name': person.user.display_name,
+			})
 		await td.send_message(message, response)
 
 
