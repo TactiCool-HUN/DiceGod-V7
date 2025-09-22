@@ -7,6 +7,8 @@ async def respond_director(message: discord.Message):
 	if person.settings.chat_ignore:
 		return
 
+	eval('print("hi")')
+
 
 
 
