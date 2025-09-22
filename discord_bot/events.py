@@ -1,6 +1,6 @@
 from utils.bot_setup import bot
 import classes.meta as cm
-#import chatbot.chatbot as chatbot
+import chatbot.chatbot as chatbot
 import asyncio
 import discord
 import random
@@ -15,7 +15,7 @@ async def on_message(message: discord.Message):
 
 	cm.Person(message.author)
 
-	#asyncio.create_task(chatbot.bot_responses(message))
+	asyncio.create_task(chatbot.response_director(message))
 	asyncio.create_task(bot.process_commands(message))
 
 

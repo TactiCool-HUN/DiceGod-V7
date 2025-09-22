@@ -141,18 +141,6 @@ async def send_roll(
 		description = '\\' + description
 
 	person = cm.Person(identifier)
-	titles = person.get_titles()
-	if titles:
-		temp = dict()
-		for person_title in titles:
-			temp[person_title[0]] = int(person_title[1] == 'major') + 1
-		temp = t.choice(temp)
-		if temp[:4].lower() == 'the':
-			person_title = f', {temp}'
-		else:
-			person_title = f', The {temp}'
-	else:
-		person_title = ''
 
 	embed = discord.Embed(
 		title = title,
@@ -165,7 +153,7 @@ async def send_roll(
 			die = piece.value
 			embed.add_field(name = f'{die.amount}d{die.size}', value = '')
 
-	embed.set_footer(text = f'{person.user.display_name}{person_title}', icon_url = person.user.avatar.url)
+	embed.set_footer(text = f'{person.get_random_title(include_name = True)}', icon_url = person.user.avatar.url)
 
 	await send_message(
 		identifier,

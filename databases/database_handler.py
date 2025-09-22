@@ -89,4 +89,29 @@ with DatabaseConnection('data') as connection:
 	except Exception as e:
 		ic(f'base data filling error:\n{e}')
 
+	# add creator
+	try:
+		cursor.execute(
+			'INSERT OR IGNORE INTO people('
+			'name, discord_id, permission_level, color'
+			') VALUES (?, ?, ?, ?)',
+			(
+				'tacticool_',
+				282869456664002581,
+				4,
+				'0x4177b3'
+			)
+		)
+		cursor.execute(
+			'INSERT OR IGNORE INTO titles('
+			'title, person_id, tier'
+			') VALUES (?, (SELECT id FROM people WHERE discord_id = 282869456664002581), ?)',
+			(
+				'Creator',
+				'major'
+			)
+		)
+	except Exception as e:
+		ic(f'base data filling error:\n{e}')
+
 pass

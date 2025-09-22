@@ -1,15 +1,74 @@
 import discord
 import discord.ext
 import classes.meta as cm
+import utils.tools as t
+import utils.tools_discord as td
+from utils.bot_setup import bot
+import random
 
-async def respond_director(message: discord.Message):
+
+def text_rando(text: str, **kwargs) -> str:
+	case_rando = kwargs.get('case_rando', True)
+	ending_rando = kwargs.get('ending_rando', True)
+
+	if case_rando:
+		match random.randint(1, 6):
+			case 1:
+				text = text.upper()
+			case 2:
+				text = text.capitalize()
+			case _:
+				pass
+
+	if ending_rando:
+		match random.randint(1, 8):
+			case 1:
+				text += '.'
+			case 2:
+				text += '!'
+			case 3:
+				text += '?'
+			case 4:
+				text += '?!'
+			case _:
+				pass
+
+	return text
+
+
+async def response_director(message: discord.Message):
 	person = cm.Person(message.author)
 	if person.settings.chat_ignore:
 		return
 
+	content = message.clean_content
+	triggered = False
+
+	if bot in message.mentions:
+		triggered = True
+	elif 'dicegod' in content.replace(' ', ''):
+		triggered = True
+	elif 'dg' in content.replace(' ', ''):
+		triggered = True
 
 
+	temp = text_rando('{person.get_random_title(True)} has spoken', case_rando = False) + '"'
+	temp2 = text_rando('{person.user.display_name} has spoken', case_rando = False) + '"'
+	if triggered:
+		responses = {
+			text_rando('yes'): int(person.permission_level),
+			text_rando('no'): 4 - int(person.permission_level),
+			text_rando('maybe'): 1,
+			'f"' + temp: 0.8,
+			'f"' + temp2: 0.2,
+		}
+		for line in person.get_responses():
+			responses[line[0]] = 1
 
+		response = t.choice(responses)
+		if response[:2] == 'f"':
+			response = t.eval_safe(response, {'person': person})
+		await td.send_message(message, response)
 
 
 pass

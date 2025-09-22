@@ -17,8 +17,6 @@ async def test(ctx: discord.ext.commands.Context):
 		t.ic(cm.Person(ctx))
 		return
 
-	cm.Person(ctx).get_titles()
-
 
 @bot.command(name = 'ping')
 async def ping(ctx: discord.ext.commands.Context):
@@ -160,7 +158,7 @@ async def award_title(interaction: discord.Interaction, title: str, target: disc
 	await followup(
 		interaction,
 		'poll',
-		f"{person.user.mention} has called a vote to add the ``{title}`` {tier} title to {target.user.mention}.", 
+		f"{person.user.mention} has called a vote to add the ``{title}`` {tier} title to {target.user.mention}.",
 		question = 'Are you in support?',
 		options = {
 			'Yes': cu.FollowupAction(
@@ -196,6 +194,43 @@ def _force_title(title: str, target: cm.Person, tier: str):
 				tier
 			)
 		)
+
+@bot.tree.command(name = 'remove-title', description = 'Remove a title of yours.')
+@discord.app_commands.describe(title = 'The title to remove.')
+@discord.app_commands.describe(target = 'Admin only! The person to remove. (default self)')
+async def remove_title(interaction: discord.Interaction, title: str, target: discord.User = None):
+	if target is None:
+		_remove_title(title, cm.Person(interaction))
+		return
+
+	if cm.Person(interaction).permission_level < 3:
+		await td.send_message(interaction, 'Only admins can remove other\'s titles.')
+		return
+
+	_remove_title(title, cm.Person(target))
+
+
+def _remove_title(title: str, person: cm.Person):
+	with DatabaseConnection('data') as con:
+		cursor = con.cursor()
+		cursor.execute(
+			'DELETE FROM titles WHERE title = ? AND person_id = ?',
+			(title, person.db_id)
+		)
+
+
+@bot.tree.command(name = 'add_personal_response', description = 'Admin only! Add a personal response to poking the bot.')
+@discord.app_commands.describe(response = 'Write the response here.')
+@discord.app_commands.describe(target = '@ the person')
+async def add_personal_response(interaction: discord.Interaction, response: str, target: discord.User):
+	if cm.Person(interaction).permission_level < 3:
+		await td.send_message(interaction, 'Admin only command.')
+		return
+
+	if cm.Person(target).add_response(response):
+		await td.send_message(interaction, 'Success')
+	else:
+		await td.send_message(interaction, 'Failure')
 
 
 pass
