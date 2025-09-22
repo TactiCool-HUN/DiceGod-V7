@@ -155,7 +155,7 @@ def get_damage_type_emoji(damage_type: str) -> str:
 	return DAMAGE_TYPES.get(damage_type)
 
 
-def safe_default_eval(template: str, safe_locals: dict = None):
+def eval_safe(template: str, safe_locals: dict = None):
 	safe_globals = {
 		"__builtins__": {
 			"str": str,
