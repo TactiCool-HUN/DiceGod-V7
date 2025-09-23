@@ -1,11 +1,12 @@
-import discord
 import discord.ext
 import classes.meta as cm
 import utils.tools as t
 import utils.tools_discord as td
 from utils.bot_setup import bot
+import databases.constants as c
 from databases.database_handler import DatabaseConnection
 import random
+from chatbot.markov import *
 
 
 def in_silent_area(message: discord.Message) -> bool:
@@ -70,6 +71,10 @@ async def response_director(message: discord.Message):
 	person = cm.Person(message.author)
 	if person.settings.chat_ignore:
 		return
+
+	# noinspection PyTypeChecker
+	markov_learner(message.clean_content)
+
 	if in_silent_area(message):
 		return
 
@@ -93,6 +98,7 @@ async def response_director(message: discord.Message):
 			text_rando('maybe'): 1,
 			'f"' + temp: 0.8,
 			'f"' + temp2: 0.2,
+			'f"{markovifier()}"': 2,
 		}
 		for line in person.get_responses():
 			responses[line[0]] = 1
@@ -102,6 +108,7 @@ async def response_director(message: discord.Message):
 			response = t.eval_safe(response, {
 				'random_title': person.get_random_title,
 				'display_name': person.user.display_name,
+				'markovifier': markovifier,
 			})
 		await stealthifier(content, message, response)
 
@@ -109,6 +116,9 @@ async def response_director(message: discord.Message):
 		await stealthifier(content, message, text_rando('nice'))
 	if 'meme' in content:
 		await stealthifier(content, message, text_rando('the DNA of the soul'))
+
+	if random.randint(1, 250) == 169:
+		await message.add_reaction(t.choice(c.DG_FAVOURITE_EMOJIS))
 
 
 pass
