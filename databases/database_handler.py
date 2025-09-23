@@ -23,16 +23,6 @@ class DatabaseConnection:
 with DatabaseConnection('data') as connection:
 	cursor = connection.cursor()
 	cursor.execute("PRAGMA foreign_keys = ON;")
-
-	# - - - colors - - -
-	cursor.execute(
-		'CREATE TABLE IF NOT EXISTS colors('
-		'hex_code text,'
-		'name text,'
-		'PRIMARY KEY (hex_code),'
-		'UNIQUE (name)'
-		')'
-	)
 	# - - - people - - -
 	cursor.execute(
 		'CREATE TABLE IF NOT EXISTS people('
@@ -74,20 +64,14 @@ with DatabaseConnection('data') as connection:
 		'FOREIGN KEY (response_id) REFERENCES responses(id) ON DELETE CASCADE'
 		')'
 	)
-
-	# add base colors
-	try:
-		with open('databases/base_data/colors.txt') as file:
-			colors = file.readlines()
-		for color in colors:
-			cursor.execute(
-				'INSERT OR IGNORE INTO colors(hex_code, name) VALUES (?, ?)',
-				(
-					color.split("=")
-				)
-			)
-	except Exception as e:
-		ic(f'base data filling error:\n{e}')
+	# - - - silent_area - - -
+	cursor.execute(
+		'CREATE TABLE IF NOT EXISTS silent_areas('
+		'id integer not null,'
+		'type text not null,'
+		'PRIMARY KEY (id)'
+		')'
+	)
 
 	# add creator
 	try:

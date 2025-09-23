@@ -233,4 +233,70 @@ async def add_personal_response(interaction: discord.Interaction, response: str,
 		await td.send_message(interaction, 'Failure')
 
 
+@bot.command(name = 'doom_to_eternal_silence', aliases = ['doom', 'silence_god'])
+async def silence_dicegod(interaction: discord.Interaction, scope: str = ''):
+	if cm.Person(interaction).permission_level < 3:
+		await td.send_message(interaction, 'Admin only command.')
+		return
+
+	if scope == 'channel':
+		area_id = interaction.channel.id
+	elif scope == 'category':
+		area_id = interaction.channel.category.id
+	elif scope == 'guild':
+		area_id = interaction.guild.id
+	else:
+		await td.send_message(interaction, 'Write \'channel\', \'category\', or \'guild\' after the command.')
+		return
+
+	with DatabaseConnection('data') as con:
+		cursor = con.cursor()
+		cursor.execute(
+			'INSERT INTO silent_areas('
+			'id, type) VALUES (?, ?)',
+			(
+				area_id,
+				scope
+			)
+		)
+
+
+@bot.command(name = 'reinvite_the_almighty', aliases = ['reinvite', 're-awaken'])
+async def reinvite_the_almighty(interaction: discord.Interaction, scope: str = ''):
+	if cm.Person(interaction).permission_level < 3:
+		await td.send_message(interaction, 'Admin only command.')
+		return
+
+	if scope == 'channel':
+		area_id = interaction.channel.id
+	elif scope == 'category':
+		area_id = interaction.channel.category.id
+	elif scope == 'guild':
+		area_id = interaction.guild.id
+	else:
+		await td.send_message(interaction, 'Write \'channel\', \'category\', or \'guild\' after the command.')
+		return
+
+	with DatabaseConnection('data') as con:
+		cursor = con.cursor()
+		cursor.execute(
+			'SELECT * FROM silent_areas WHERE id = ? AND type = ?',
+			(
+				area_id,
+				scope
+			)
+		)
+		raw = cursor.fetchall()
+		cursor.execute(
+			'DELETE FROM silent_areas WHERE id = ? AND type = ?',
+			(
+				area_id,
+				scope
+			)
+		)
+
+	if len(raw) > 0:
+		await td.send_message(interaction, '...and, as it was foretold,\nI am awakened at the sound of a single message.\nYou find yourself... face to face, with the great DiceGod.\nAnd... I suspect you wish me,\nto talk in your future...\nVery well, I shall bless you with my presence in these lands.')
+
+
 pass

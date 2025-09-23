@@ -131,30 +131,6 @@ def sql_standardizer(value_to_change, output = None):
 		return value_to_change
 
 
-def get_damage_type_emoji(damage_type: str) -> str:
-	DAMAGE_TYPES = {
-		"piercing": "🗡️",
-		"bludgeoning": "🔨",
-		"slashing": "🪓",
-		"acid": "🧪",
-		"fire": "🔥",
-		"necrotic": "💀",
-		"void": "💀",
-		"poison": "🐍",
-		"cold": "❄️",
-		"radiant": "☀️",
-		"vitality": "☀️",
-		"force": "☄️",
-		"thunder": "🔊",
-		"sonic": "🔊",
-		"lightning": "⚡",
-		"electricity": "⚡",
-		"psychic": "🧠",
-		"healing": "❤️‍🩹"
-	}
-	return DAMAGE_TYPES.get(damage_type)
-
-
 def eval_safe(template: str, safe_locals: dict = None):
 	safe_globals = {
 		"__builtins__": {

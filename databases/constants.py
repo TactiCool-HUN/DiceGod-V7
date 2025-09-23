@@ -1,0 +1,30 @@
+COLOR: dict[str, str] = {
+	'red_dark': '0x7C0A02',
+	'yellow_dark': '0xFFD300',
+	'green_moss': '0x466D1D',
+	'orange_burnt_amber': '0x8A3324',
+	'blue_yale': '0x0E4C92',
+	'black': '0x000000',
+	'white': '0xFFFFFF',
+	'tactical_blue': '0x4177B3',
+}
+DAMAGE_TYPES = {
+	"piercing": "🗡️",
+	"bludgeoning": "🔨",
+	"slashing": "🪓",
+	"acid": "🧪",
+	"fire": "🔥",
+	"necrotic": "💀",
+	"void": "💀",
+	"poison": "🐍",
+	"cold": "❄️",
+	"radiant": "☀️",
+	"vitality": "☀️",
+	"force": "☄️",
+	"thunder": "🔊",
+	"sonic": "🔊",
+	"lightning": "⚡",
+	"electricity": "⚡",
+	"psychic": "🧠",
+	"healing": "❤️‍🩹"
+}
