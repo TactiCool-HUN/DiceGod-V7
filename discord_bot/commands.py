@@ -85,9 +85,9 @@ async def coin_slash(interaction: discord.Interaction):
 @bot.tree.command(name = 'settings', description = 'Set your T(h)ings!')
 @discord.app_commands.describe(color = "Set your color! (use #000000 or 0x000000 hex code)")
 async def settings(interaction: discord.Interaction, color: str):
-	person = cm.Person(interaction).settings.set_color(color)
+	person = cm.Person(interaction)
+	person.settings.color = color
 	person.update()
-
 
 
 @bot.tree.command(name = 'titles', description = 'Check someone\'s titles!')
@@ -158,7 +158,7 @@ async def award_title(interaction: discord.Interaction, title: str, target: disc
 	await followup(
 		interaction,
 		'poll',
-		f"{person.user.mention} has called a vote to add the ``{title}`` {tier} title to {target.user.mention}.", 
+		f"{person.user.mention} has called a vote to add the ``{title}`` {tier} title to {target.user.mention}.",
 		question = 'Are you in support?',
 		options = {
 			'Yes': cu.FollowupAction(
@@ -194,6 +194,109 @@ def _force_title(title: str, target: cm.Person, tier: str):
 				tier
 			)
 		)
+
+@bot.tree.command(name = 'remove-title', description = 'Remove a title of yours.')
+@discord.app_commands.describe(title = 'The title to remove.')
+@discord.app_commands.describe(target = 'Admin only! The person to remove. (default self)')
+async def remove_title(interaction: discord.Interaction, title: str, target: discord.User = None):
+	if target is None:
+		_remove_title(title, cm.Person(interaction))
+		return
+
+	if cm.Person(interaction).permission_level < 3:
+		await td.send_message(interaction, 'Only admins can remove other\'s titles.')
+		return
+
+	_remove_title(title, cm.Person(target))
+
+
+def _remove_title(title: str, person: cm.Person):
+	with DatabaseConnection('data') as con:
+		cursor = con.cursor()
+		cursor.execute(
+			'DELETE FROM titles WHERE title = ? AND person_id = ?',
+			(title, person.db_id)
+		)
+
+
+@bot.tree.command(name = 'add_personal_response', description = 'Admin only! Add a personal response to poking the bot.')
+@discord.app_commands.describe(response = 'Write the response here.')
+@discord.app_commands.describe(target = '@ the person')
+async def add_personal_response(interaction: discord.Interaction, response: str, target: discord.User):
+	if cm.Person(interaction).permission_level < 3:
+		await td.send_message(interaction, 'Admin only command.')
+		return
+
+	if cm.Person(target).add_response(response):
+		await td.send_message(interaction, 'Success')
+	else:
+		await td.send_message(interaction, 'Failure')
+
+
+@bot.command(name = 'doom_to_eternal_silence', aliases = ['doom', 'silence_god'])
+async def silence_dicegod(interaction: discord.Interaction, scope: str = ''):
+	if cm.Person(interaction).permission_level < 3:
+		await td.send_message(interaction, 'Admin only command.')
+		return
+
+	if scope == 'channel':
+		area_id = interaction.channel.id
+	elif scope == 'category':
+		area_id = interaction.channel.category.id
+	elif scope == 'guild':
+		area_id = interaction.guild.id
+	else:
+		await td.send_message(interaction, 'Write \'channel\', \'category\', or \'guild\' after the command.')
+		return
+
+	with DatabaseConnection('data') as con:
+		cursor = con.cursor()
+		cursor.execute(
+			'INSERT INTO silent_areas('
+			'id, type) VALUES (?, ?)',
+			(
+				area_id,
+				scope
+			)
+		)
+
+
+@bot.command(name = 'reinvite_the_almighty', aliases = ['reinvite', 're-awaken'])
+async def reinvite_the_almighty(interaction: discord.Interaction, scope: str = ''):
+	if cm.Person(interaction).permission_level < 3:
+		await td.send_message(interaction, 'Admin only command.')
+		return
+
+	if scope == 'channel':
+		area_id = interaction.channel.id
+	elif scope == 'category':
+		area_id = interaction.channel.category.id
+	elif scope == 'guild':
+		area_id = interaction.guild.id
+	else:
+		await td.send_message(interaction, 'Write \'channel\', \'category\', or \'guild\' after the command.')
+		return
+
+	with DatabaseConnection('data') as con:
+		cursor = con.cursor()
+		cursor.execute(
+			'SELECT * FROM silent_areas WHERE id = ? AND type = ?',
+			(
+				area_id,
+				scope
+			)
+		)
+		raw = cursor.fetchall()
+		cursor.execute(
+			'DELETE FROM silent_areas WHERE id = ? AND type = ?',
+			(
+				area_id,
+				scope
+			)
+		)
+
+	if len(raw) > 0:
+		await td.send_message(interaction, '...and, as it was foretold,\nI am awakened at the sound of a single message.\nYou find yourself... face to face, with the great DiceGod.\nAnd... I suspect you wish me,\nto talk in your future...\nVery well, I shall bless you with my presence in these lands.')
 
 
 pass

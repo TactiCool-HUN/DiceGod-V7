@@ -1,0 +1,17 @@
+name: Eval Safety Check
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+
+jobs:
+  check_eval:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check for unsafe eval
+        run: python tests/eval_safety_test.py

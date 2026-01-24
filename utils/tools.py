@@ -131,28 +131,23 @@ def sql_standardizer(value_to_change, output = None):
 		return value_to_change
 
 
-def get_damage_type_emoji(damage_type: str) -> str:
-	DAMAGE_TYPES = {
-		"piercing": "🗡️",
-		"bludgeoning": "🔨",
-		"slashing": "🪓",
-		"acid": "🧪",
-		"fire": "🔥",
-		"necrotic": "💀",
-		"void": "💀",
-		"poison": "🐍",
-		"cold": "❄️",
-		"radiant": "☀️",
-		"vitality": "☀️",
-		"force": "☄️",
-		"thunder": "🔊",
-		"sonic": "🔊",
-		"lightning": "⚡",
-		"electricity": "⚡",
-		"psychic": "🧠",
-		"healing": "❤️‍🩹"
+def eval_safe(template: str, safe_locals: dict = None):
+	safe_globals = {
+		"__builtins__": {
+			"str": str,
+			"int": int,
+			"float": float,
+			"bool": bool,
+			"dict": dict,
+			"list": list,
+			"tuple": tuple,
+			"set": set,
+		}
 	}
-	return DAMAGE_TYPES.get(damage_type)
+	if safe_locals is None:
+		safe_locals = dict()
+
+	return eval(template, safe_globals, safe_locals)  # safety-wrapper-eval
 
 
 class ListIterator:

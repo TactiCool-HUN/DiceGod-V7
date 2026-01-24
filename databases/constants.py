@@ -1,0 +1,43 @@
+COLOR: dict[str, str] = {
+	'red_dark': '0x7C0A02',
+	'yellow_dark': '0xFFD300',
+	'green_moss': '0x466D1D',
+	'orange_burnt_amber': '0x8A3324',
+	'blue_yale': '0x0E4C92',
+	'black': '0x000000',
+	'white': '0xFFFFFF',
+	'tactical_blue': '0x4177B3',
+}
+DAMAGE_TYPES = {
+	"piercing": "🗡️",
+	"bludgeoning": "🔨",
+	"slashing": "🪓",
+	"acid": "🧪",
+	"fire": "🔥",
+	"necrotic": "💀",
+	"void": "💀",
+	"poison": "🐍",
+	"cold": "❄️",
+	"radiant": "☀️",
+	"vitality": "☀️",
+	"force": "☄️",
+	"thunder": "🔊",
+	"sonic": "🔊",
+	"lightning": "⚡",
+	"electricity": "⚡",
+	"psychic": "🧠",
+	"healing": "❤️‍🩹"
+}
+DG_FAVOURITE_EMOJIS = {
+	"✨": 1,
+	"❤️": 1,
+	"💖": 1,
+	"💜": 1,
+	"🐸": 1,
+	"<:idek:694605001502228540>": 1,
+	"<:zorablush:1021403403768844308>": 1,
+	"<:UwU:959931778905276456>": 1,
+	"<:Kyrihihihi:1058348961523576872>": 1,
+	"<:point:951578243415302235>": 1,
+	"<:diebish:694527515921743883>": 1,
+}

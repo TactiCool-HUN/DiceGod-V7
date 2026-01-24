@@ -22,16 +22,7 @@ class DatabaseConnection:
 # ENSURE TABLES
 with DatabaseConnection('data') as connection:
 	cursor = connection.cursor()
-
-	# - - - colors - - -
-	cursor.execute(
-		'CREATE TABLE IF NOT EXISTS colors('
-		'hex_code text,'
-		'name text,'
-		'PRIMARY KEY (hex_code),'
-		'UNIQUE (name)'
-		')'
-	)
+	cursor.execute("PRAGMA foreign_keys = ON;")
 	# - - - people - - -
 	cursor.execute(
 		'CREATE TABLE IF NOT EXISTS people('
@@ -40,6 +31,7 @@ with DatabaseConnection('data') as connection:
 		'discord_id integer,'
 		'permission_level integer default 0,'
 		'color text default "0x000000",'
+		'chat_ignore integer default 0,'
 		'PRIMARY KEY (id),'
 		'UNIQUE (discord_id)'
 		')'
@@ -53,41 +45,56 @@ with DatabaseConnection('data') as connection:
 		'PRIMARY KEY (title)'
 		')'
 	)
-	# - - - chatbot silences - - -
+	# - - - responses - - -
 	cursor.execute(
-		'CREATE TABLE IF NOT EXISTS chatbot_silences('
+		'CREATE TABLE IF NOT EXISTS responses('
 		'id integer,'
-		'guild_id integer not null,'
-		'sub_id integer not null,'
-		'type text not null,'
+		'response text,'
 		'PRIMARY KEY (id),'
-		'UNIQUE (guild_id, sub_id, type)'
+		'UNIQUE(response)'
+		')'
+	)
+	# - - - con_response_people - - -
+	cursor.execute(
+		'CREATE TABLE IF NOT EXISTS con_response_person('
+		'person_id integer not null,'
+		'response_id integer not null,'
+		'PRIMARY KEY (person_id, response_id),'
+		'FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE, '
+		'FOREIGN KEY (response_id) REFERENCES responses(id) ON DELETE CASCADE'
+		')'
+	)
+	# - - - silent_area - - -
+	cursor.execute(
+		'CREATE TABLE IF NOT EXISTS silent_areas('
+		'id integer not null,'
+		'type text not null,'
+		'PRIMARY KEY (id)'
 		')'
 	)
 
 	# add creator
 	try:
 		cursor.execute(
-			'INSERT OR IGNORE INTO people(discord_id, permission_level) VALUES (?, ?)',
+			'INSERT OR IGNORE INTO people('
+			'name, discord_id, permission_level, color'
+			') VALUES (?, ?, ?, ?)',
 			(
+				'tacticool_',
 				282869456664002581,
-				4
+				4,
+				'0x4177b3'
 			)
 		)
-	except Exception as e:
-		ic(f'base data filling error:\n{e}')
-	
-	# add base colors
-	try:
-		with open('databases/base_data/colors.txt') as file:
-			colors = file.readlines()
-		for color in colors:
-			cursor.execute(
-				'INSERT OR IGNORE INTO colors(hex_code, name) VALUES (?, ?)',
-				(
-					color.split("=")
-				)
+		cursor.execute(
+			'INSERT OR IGNORE INTO titles('
+			'title, person_id, tier'
+			') VALUES (?, (SELECT id FROM people WHERE discord_id = 282869456664002581), ?)',
+			(
+				'Creator',
+				'major'
 			)
+		)
 	except Exception as e:
 		ic(f'base data filling error:\n{e}')
 	

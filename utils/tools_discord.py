@@ -2,6 +2,7 @@ import discord.ext
 import classes.meta as cm
 import classes.dicebot as cd
 import utils.tools as t
+import databases.constants as c
 
 
 async def send_message(
@@ -25,6 +26,8 @@ async def send_message(
 	embed: discord.Embed | None = kwargs.get('embed', None)
 	poll: discord.Poll | None = kwargs.get('poll', None)
 	edit_original_response: bool = kwargs.get('edit_original_response', False)
+
+	sent: discord.Message | None = None
 
 	match type(identifier):
 		case discord.Interaction:
@@ -59,6 +62,7 @@ async def send_message(
 				identifier: discord.Message
 			else:
 				identifier: discord.ext.commands.Context
+
 			if reply:
 				sent: discord.Message = await identifier.reply(
 					content = text,
@@ -97,7 +101,10 @@ async def send_message(
 		case _:
 			raise TypeError(f"invalid Identifier type in dt.send_message()\nIdentifier type: {type(identifier)}\nIdentifier: {identifier}")
 
-	return sent
+	if sent is None:
+		raise ValueError('sent is none?!')
+	else:
+		return sent
 
 
 def roll_recursive_builder(roll_pieces: list[cd.RollPiece]) -> str:
@@ -110,7 +117,7 @@ def roll_recursive_builder(roll_pieces: list[cd.RollPiece]) -> str:
 		else:
 			builder.append(str(part.value))
 		if part.damage_type is not None:
-			builder.append(t.get_damage_type_emoji(part.damage_type))
+			builder.append(c.DAMAGE_TYPES[part.damage_type])
 	
 	return f"({' '.join(builder)})"
 
@@ -132,29 +139,34 @@ async def send_roll(
 		else:
 			builder.append(t.num2emoji(int(part.value)))
 			if part.damage_type is not None:
-				builder.append(t.get_damage_type_emoji(part.damage_type))
+				builder.append(c.DAMAGE_TYPES[part.damage_type])
 	
 	title = f'**Roll Result:** {"".join(builder)}'
 	
 	description = roll_recursive_builder(roll_pieces)[1:-1].replace('*', '\*')
 	if description[0] == '-':
 		description = '\\' + description
-	
+
+	person = cm.Person(identifier)
+
 	embed = discord.Embed(
 		title = title,
 		description = description,
-		color = cm.Person(identifier).settings.color
+		color = person.settings.color
 	)
 	
 	for piece in roll_pieces:
 		if piece.type == 'die':
 			die = piece.value
 			embed.add_field(name = f'{die.amount}d{die.size}', value = '')
-	
+
+	embed.set_footer(text = f'{person.get_random_title(include_name = True)}', icon_url = person.user.avatar.url)
+
 	await send_message(
 		identifier,
 		'',
-		embed = embed
+		embed = embed,
+		reply = True
 	)
 
 

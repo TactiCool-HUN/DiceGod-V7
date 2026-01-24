@@ -3,10 +3,24 @@ import discord
 
 class PersonalSettings:
 	def __init__(self):
-		self.color: discord.Color | None = None
+		self._color: discord.Color | None = None
+		self._chat_ignore: bool = False
 
-	def set_color(self, string: str):
-		self.color = discord.Color.from_str(string)
+	@property
+	def color(self) -> discord.Color | None:
+		return self._color
+
+	@color.setter
+	def color(self, value: str):
+		self._color = discord.Color.from_str(value)
+
+	@property
+	def chat_ignore(self) -> bool:
+		return self._chat_ignore
+
+	@chat_ignore.setter
+	def chat_ignore(self, value: bool):
+		self._chat_ignore = bool(value)
 
 
 class PermissionLevel:

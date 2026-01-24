@@ -15,7 +15,7 @@ async def on_message(message: discord.Message):
 
 	cm.Person(message.author)  # breaks if banned person
 
-	asyncio.create_task(chatbot.process_message(message))
+	asyncio.create_task(chatbot.response_director(message))
 	asyncio.create_task(bot.process_commands(message))
 
 
