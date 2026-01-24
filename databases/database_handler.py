@@ -53,7 +53,30 @@ with DatabaseConnection('data') as connection:
 		'PRIMARY KEY (title)'
 		')'
 	)
+	# - - - chatbot silences - - -
+	cursor.execute(
+		'CREATE TABLE IF NOT EXISTS chatbot_silences('
+		'id integer,'
+		'guild_id integer not null,'
+		'sub_id integer not null,'
+		'type text not null,'
+		'PRIMARY KEY (id),'
+		'UNIQUE (guild_id, sub_id, type)'
+		')'
+	)
 
+	# add creator
+	try:
+		cursor.execute(
+			'INSERT OR IGNORE INTO people(discord_id, permission_level) VALUES (?, ?)',
+			(
+				282869456664002581,
+				4
+			)
+		)
+	except Exception as e:
+		ic(f'base data filling error:\n{e}')
+	
 	# add base colors
 	try:
 		with open('databases/base_data/colors.txt') as file:
@@ -65,6 +88,29 @@ with DatabaseConnection('data') as connection:
 					color.split("=")
 				)
 			)
+	except Exception as e:
+		ic(f'base data filling error:\n{e}')
+	
+	# add base silences
+	try:
+		cursor.execute(
+			'INSERT OR IGNORE INTO chatbot_silences('
+			'guild_id, sub_id, type) VALUES (?, ?, ?)',
+			(
+				996065301055688794,  # dicegod sanctuary
+				562373378967732226,  # rpg corner
+				'category'
+			)
+		)
+		cursor.execute(
+			'INSERT OR IGNORE INTO chatbot_silences('
+			'guild_id, sub_id, type) VALUES (?, ?, ?)',
+			(
+				1032650247622639686,  # void
+				562373378967732226,  # rpg corner
+				'channel'
+			)
+		)
 	except Exception as e:
 		ic(f'base data filling error:\n{e}')
 

@@ -2,3 +2,4 @@
 /databases/data.db
 /.idea/*
 /venv/*
+/databases/markov_studies/
