@@ -78,11 +78,11 @@ with DatabaseConnection('data') as connection:
 		'CREATE TABLE IF NOT EXISTS statistics('
 		'id integer not null,'
 		'owner_id integer not null,'  # discord id
-		'outcome,'
-		'size,'
-		'used,'
-		'die_text,'
-		'date,'
+		'outcome integer not null,'
+		'size integer not null,'
+		'used integer not null,'
+		'die_text text not null,'
+		'date timestamp not null,'
 		'PRIMARY KEY (id)'
 		')'
 	)

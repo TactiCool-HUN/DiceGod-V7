@@ -3,6 +3,8 @@ import classes.meta as cm
 import classes.dicebot as cd
 import utils.tools as t
 import databases.constants as c
+from databases.database_handler import DatabaseConnection
+import datetime
 
 
 async def send_message(
@@ -149,7 +151,7 @@ async def send_roll(
 	
 	for piece in roll_pieces:
 		if piece.type == 'die':
-			die = piece.value
+			die: cd.Die = piece.value
 			value = ''
 			first = True
 			for i, roll in enumerate(die.rolls):
@@ -167,6 +169,28 @@ async def send_roll(
 						value += f' | Roll #{i + 1}: **{roll[0]}**'
 					else:
 						value += f' | ~~Roll #{i + 1}: **{roll[0]}**~~'
+			
+				with DatabaseConnection('data') as con:
+					cursor = con.cursor()
+					cursor.execute(
+						'INSERT INTO statistics('
+						'owner_id,'
+						'outcome,'
+						'size,'
+						'used,'
+						'die_text,'
+						'date'
+						') VALUES (?, ?, ?, ?, ?, ?)',
+						(
+							person.user.id,
+							roll[0],
+							die.size,
+							roll[1],
+							f'{die.amount}d{die.size}{die.modifiers}',
+							datetime.datetime.now()
+						)
+					)
+			
 			embed.add_field(name = f'{die.amount}d{die.size}{die.modifiers}', value = value)
 
 	embed.set_footer(text = f'{person.get_random_title(include_name = True)}', icon_url = person.user.avatar.url)
