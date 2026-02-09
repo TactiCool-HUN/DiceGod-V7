@@ -43,6 +43,48 @@ async def on_ready():
 			t.ic(e)
 
 
+@bot.event
+async def on_raw_reaction_add(reaction: discord.RawReactionActionEvent):
+	cm.Person(reaction.member)
+	if reaction.member != bot.user and random.randint(1, 20) == 20:
+			channel = bot.get_guild(reaction.guild_id).get_channel(reaction.channel_id)
+			message: discord.Message = await channel.fetch_message(reaction.message_id)
+			await message.add_reaction(reaction.emoji)
+
+@bot.event
+async def on_member_update(before: discord.Member, after: discord.Member):
+	cm.Person(before.id)
+	if before.roles == after.roles:
+		return
+
+	guild = before.guild
+	member = before
+	roles_removed: list[discord.Role] = []
+	roles_added: list[discord.Role] = []
+
+	for role in before.roles:
+		if role not in after.roles:
+			roles_removed.append(role)
+
+	for role in after.roles:
+		if role not in before.roles:
+			roles_added.append(role)
+
+	if roles_added:
+		for role in roles_added:
+			if role.id == 1159498034795794603:  # person just joined
+				splitter_1 = guild.get_role(1170868005824122921)
+				splitter_2 = guild.get_role(1170867216812609606)
+				splitter_3 = guild.get_role(1170867216812609606)
+				splitter_4 = guild.get_role(1170866746194931742)
+				splitter_5 = guild.get_role(1170864676574351380)
+				await member.add_roles(splitter_1)
+				await member.add_roles(splitter_2)
+				await member.add_roles(splitter_3)
+				await member.add_roles(splitter_4)
+				await member.add_roles(splitter_5)
+
+
 async def activity_changer():
 	timer = 12 * 60 * 60  # 12 hours in seconds
 	activity = None

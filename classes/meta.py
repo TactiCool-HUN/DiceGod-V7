@@ -235,6 +235,17 @@ class Person:
 			unpacked.append(line[0])
 		
 		return unpacked
+	
+	def get_rolls(self):
+		with DatabaseConnection('data') as con:
+			cursor = con.cursor()
+			cursor.execute(
+				'SELECT * FROM statistics WHERE owner_id = ?',
+				(self.user.id,)
+			)
+			rolls = cursor.fetchall()
+			
+		return rolls
 
 
 pass

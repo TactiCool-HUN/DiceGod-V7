@@ -73,6 +73,29 @@ with DatabaseConnection('data') as connection:
 		'PRIMARY KEY (id)'
 		')'
 	)
+	# - - - statistics - - -
+	cursor.execute(
+		'CREATE TABLE IF NOT EXISTS statistics('
+		'id integer not null,'
+		'owner_id integer not null,'  # discord id
+		'outcome,'
+		'size,'
+		'used,'
+		'die_text,'
+		'date,'
+		'PRIMARY KEY (id)'
+		')'
+	)
+	# - - - tables - - -
+	cursor.execute(
+		'CREATE TABLE IF NOT EXISTS tables('
+		'id integer not null,'
+		'table_name text not null,'
+		'gm_id integer not null,'
+		'role_id integer not null,'
+		'guest_id integer not null,'
+		'PRIMARY KEY (id)'
+	)
 
 	# add creator
 	try:

@@ -131,6 +131,19 @@ def sql_standardizer(value_to_change, output = None):
 		return value_to_change
 
 
+def most_frequent(list_inc):
+	counter = 0
+	num = list_inc[0]
+
+	for i in list_inc:
+		curr_frequency = list_inc.count(i)
+		if curr_frequency > counter:
+			counter = curr_frequency
+			num = i
+
+	return num
+
+
 def eval_safe(template: str, safe_locals: dict = None):
 	safe_globals = {
 		"__builtins__": {

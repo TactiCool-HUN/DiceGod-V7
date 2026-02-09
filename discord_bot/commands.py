@@ -1,4 +1,6 @@
 from databases.database_handler import DatabaseConnection
+from modals.table_maker import table_maker_main
+from modals.table_modal import table_command
 from utils.followup import followup
 from utils.bot_setup import bot
 import utils.tools as t
@@ -87,9 +89,18 @@ async def coin_slash(interaction: discord.Interaction):
 
 @bot.tree.command(name = 'settings', description = 'Set your Things!')
 @discord.app_commands.describe(color = "Set your color! (use #000000 or 0x000000 hex code)")
-async def settings(interaction: discord.Interaction, color: str):
+@discord.app_commands.choices(chat_ignore=[
+	discord.app_commands.Choice(name = "on", value = 1),
+	discord.app_commands.Choice(name = "off", value = 0)])
+async def settings(interaction: discord.Interaction, color: str = '', chat_ignore: int = None):
 	person = cm.Person(interaction)
-	person.settings.color = color
+
+	if color:
+		person.settings.color = color
+
+	if chat_ignore is not None:
+		person.settings.chat_ignore = chat_ignore
+
 	person.update()
 	await td.send_message(interaction, 'Settings updated.')
 
@@ -306,6 +317,146 @@ async def reinvite_the_almighty(interaction: discord.Interaction, silence_tier: 
 
 	if len(raw) > 0:
 		await td.send_message(interaction, '...and, as it was foretold,\nI am awakened at the sound of a single message.\nYou find yourself... face to face, with the great DiceGod.\nAnd... I suspect you wish me,\nto talk in your future...\nVery well, I shall bless you with my presence in these lands.')
+
+
+@bot.command(name = "kill")
+async def kill_command(ctx: discord.ext.commands.Context, *, other = None):
+	t.ic(f'{ctx.author} said "{other}", how rude...')
+	# noinspection SpellCheckingInspection
+	await ctx.message.add_reaction("<:angycat:817122720227524628>")
+	if cm.Person(ctx).permission_level > 2 and ctx.message.mentions:
+		result = f"-die {ctx.message.mentions[0].mention}"
+	else:
+		# noinspection SpellCheckingInspection
+		response_list = {
+			"Don't be so rude...": 1,
+			"ruuuuude": 1,
+			"You accidentally mispelled the \"-die\" command.": 2,
+			f"-die {ctx.author.mention}": 1,
+			f"Quit it {ctx.author.mention}!": 1,
+		}
+		result = t.choice(response_list)
+	if result[0] == "-":
+		sent = await td.send_message(ctx, text = result, reply = True)
+		sent = await sent.reply("Contacting Pinkertons, please do not leave your current area. (○)")
+		for i in range(20):
+			if i % 2 == 0:
+				await sent.edit(content = "Contacting Pinkertons, please do not leave your current area. (●)")
+			else:
+				await sent.edit(content = "Contacting Pinkertons, please do not leave your current area. (○)")
+			await asyncio.sleep(1)
+		await sent.edit(content = "Pinkertons connection established: Publishing address.")
+		await asyncio.sleep(5)
+		await sent.edit(content = "Pinkertons connection established: Requesting agent.")
+		await asyncio.sleep(6)
+		await sent.edit(content = "Pinkertons connection established: Agent granted.\nStandby for annihilation.")
+	else:
+		await td.send_message(ctx, text = result, reply = True)
+
+
+@bot.tree.command(name = 'statistics', description = 'Display your or others roll statistics.')
+@discord.app_commands.describe(person = '@ the person you want to get statistics about.')
+@discord.app_commands.choices(get_all_rolls = [
+	discord.app_commands.Choice(name = 'Yes', value = True),
+	discord.app_commands.Choice(name = 'No', value = False),
+])
+async def statistics(interaction: discord.Interaction, person: discord.Member = None, get_all_rolls: bool = False):
+	initiator = cm.Person(interaction)
+	
+	if person:
+		target = cm.Person(person)
+		ephemeral = False
+	else:
+		target = initiator
+		ephemeral = True
+
+	if get_all_rolls:
+		ephemeral = False
+
+	await interaction.response.defer(ephemeral = ephemeral)
+
+	if get_all_rolls:
+		with DatabaseConnection("data.db") as connection:
+			cursor = connection.cursor()
+			cursor.execute("SELECT * FROM statistics")
+			rolls = cursor.fetchall()
+	else:
+		rolls = target.get_rolls()
+
+	rolls_used = []
+	rolls_dict = {}
+	fields = []
+
+	for roll in rolls:
+		if int(roll[4]):
+			rolls_used.append(roll)
+		try:
+			rolls_dict[roll[3]].append(roll[2])
+		except KeyError:
+			rolls_dict[roll[3]] = [roll[2]]
+
+	key_order = [20, 100, 12, 10, 8, 6, 4, 2]
+	new_order = {}
+	for k in key_order:
+		if k in rolls_dict:
+			new_order[k] = rolls_dict[k]
+	for k in rolls_dict:
+		if k not in new_order:
+			new_order[k] = rolls_dict[k]
+	rolls_dict = new_order
+
+	key_num = 0
+	for key in rolls_dict:
+		key_num = key_num + 1
+		if key_num > 20:
+			break
+		minimum = 0
+		maximum = 0
+		frequent_num = 0
+		frequent = t.most_frequent(rolls_dict[key])
+		for roll in rolls_dict[key]:
+			if roll == 1:
+				minimum += 1
+			elif roll == key:
+				maximum += 1
+			if roll == frequent:
+				frequent_num += 1
+
+		average = round(sum(rolls_dict[key]) / len(rolls_dict[key]), 2)
+		txt = f"""Rolled: {len(rolls_dict[key])}
+			Average: {average}
+			Most frequent roll: {frequent}
+			Rolled {frequent_num} times ({round(frequent_num / len(rolls_dict[key]) * 100, 2)}%)
+			Minimum rolls: {minimum} ({round(minimum / len(rolls_dict[key]) * 100, 2)}%)
+			Maximum rolls: {maximum} ({round(maximum / len(rolls_dict[key]) * 100, 2)}%)"""
+		
+		fields.append([f"d{key} stats", txt])
+
+	general = f"Rolled: {len(rolls)}"
+	general = general + f"\nFrom which {len(rolls_used)} ({round(len(rolls_used) / len(rolls) * 100, 2)}%) were actually used."
+
+	embed = discord.Embed(
+		title = "General Statistics",
+		description = general,
+		color = initiator.settings.color,
+	)
+	embed.set_author(name = initiator.member.display_name, icon_url = initiator.member.avatar.url)
+
+	for element in fields:
+		embed.add_field(name = element[0], value = element[1])
+	embed.add_field(name = "Color", value = target.settings.color, inline = False)
+	await td.send_message(interaction, embed = embed)
+
+
+@bot.tree.command(name = "create_table", description = "Trusted only command! Create your own table! (send it in empty)")
+async def create_table(interaction: discord.Interaction):
+	cm.Person(interaction)
+	await table_maker_main(interaction)
+
+
+@bot.tree.command(name = "table", description = "Manage your own tables! (send it in empty)")
+async def table_slash(interaction: discord.Interaction):
+	await table_command(interaction)
 
 
 pass
