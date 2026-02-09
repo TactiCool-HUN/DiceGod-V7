@@ -7,6 +7,7 @@ import discord
 import random
 import utils.global_settings as settings
 import utils.tools as t
+import utils.tools_discord as td
 
 
 @bot.event
@@ -81,7 +82,7 @@ async def activity_changer():
 					"Watching Fanki rolling nat1s": 0.4,
 					"Watching Popa rolling nat20s": 0.4,
 					"Watching people derail the campaign": 1,
-					f"Watching {person.user.display_name}... :)": 2,
+					f"Watching {person.user.display_name}... :)": 1.6,
 				}
 				activity = discord.Activity(name = t.choice(choices), type = 3)
 			case 3:  # competing in (has been removed from dc)
@@ -94,6 +95,7 @@ async def activity_changer():
 
 		await bot.change_presence(status = discord.Status.online, activity = activity)
 		await asyncio.sleep(timer)
+		# await td.send_message(cm.Person(1030881161796403251), '<a:frogroll:910570184518025216>', silent = False)
 
 
 pass

@@ -9,7 +9,7 @@ class Die:
 		self.is_resolved: bool = False
 		# each roll in rolls is [number, bool]
 		# where bool if it is used for the total or not
-		self.rolls: list[int] = []
+		self.rolls: list[list] = []
 		self.total: int | None = None
 		self.modifiers: str = ''
 		

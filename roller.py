@@ -3,6 +3,7 @@ from discord.ext.commands import param
 from utils.bot_setup import bot
 import utils.tools_discord as td
 import classes.dicebot as cd
+import copy
 
 
 async def roll_initiation(
@@ -33,8 +34,9 @@ async def roll_initiation(
 		else:
 			packed_roll_pack = []
 			for _ in range(multiplier):
-				packed_roll_pack.append([roll_pieces, evaluate(roll_pieces)])
-				await td.send_pack(identifier, packed_roll_pack)
+				roll_pieces_copy = copy.deepcopy(roll_pieces)
+				packed_roll_pack.append([roll_pieces_copy, evaluate(roll_pieces_copy)])
+			await td.send_pack(identifier, packed_roll_pack)
 
 
 def roll_parse(roll_text_og: str) -> list[cd.RollPiece]:

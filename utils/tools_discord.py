@@ -107,13 +107,16 @@ async def send_message(
 		return sent
 
 
-def roll_recursive_builder(roll_pieces: list[cd.RollPiece]) -> str:
+def roll_recursive_builder(roll_pieces: list[cd.RollPiece], unresolved: bool = False) -> str:
 	builder = []
 	for part in roll_pieces:
 		if part.type == 'roll_piece':
-			builder.append(roll_recursive_builder(part.value))
+			builder.append(roll_recursive_builder(part.value, unresolved))
 		elif part.type == 'die':
-			builder.append(str(part.value))
+			if unresolved:
+				builder.append(f'{part.value.amount}d{part.value.size}{part.value.modifiers}')
+			else:
+				builder.append(str(part.value))
 		else:
 			builder.append(str(part.value))
 		if part.damage_type is not None:
@@ -189,10 +192,72 @@ async def send_roll(
 
 async def send_pack(
 		identifier: discord.Interaction | discord.ext.commands.Context,
-		packed_roll_pack: list[list[list[cd.RollPiece]]]
+		packed_roll_pack: list[list[list[cd.RollPiece]]],
 ):
-	pass
+	total = 0
+	fields = []
+	for i, pack in enumerate(packed_roll_pack):
+		builder = []
+		for part in pack[1]:
+			if part.type == 'operator':
+				if part == '-':
+					builder.append(':no_entry:')
+				else:
+					builder.append(f'**{part}**')
+			else:
+				total += int(part.value)
+				builder.append(t.num2emoji(int(part.value)))
+				if part.damage_type is not None:
+					builder.append(c.DAMAGE_TYPES[part.damage_type])
+		
+		mega_value = []
+		for part in pack[0]:
+			if part.type == 'die':
+				die = part.value
+				value = ''
+				first = True
+				for j, roll in enumerate(die.rolls):
+					if j % 2 == 0:
+						if not first:
+							value += '\n'
+						else:
+							first = False
+						if roll[1]:
+							value += f'Roll #{j + 1}: **{roll[0]}**'
+						else:
+							value += f'~~Roll #{j + 1}: **{roll[0]}**~~'
+					else:
+						if roll[1]:
+							value += f' | Roll #{j + 1}: **{roll[0]}**'
+						else:
+							value += f' | ~~Roll #{j + 1}: **{roll[0]}**~~'
+				mega_value.append(f'__Rolls [{die.amount}d{die.size}{die.modifiers}]__\n{value}')
 
+		fields.append([f'**Sum #{i + 1} - {"".join(builder)}**', '\n'.join(mega_value)])
+
+	roll_text = roll_recursive_builder(packed_roll_pack[0][0], True)[1:-1].replace('*', '\*')
+	if roll_text[0] == '-':
+		roll_text = '\\' + roll_text
+	description = f'Combined Sum: {total}\nRoll Text: {roll_text}\nTimes: {len(packed_roll_pack)}'
+	
+	person = cm.Person(identifier)
+	embed = discord.Embed(
+		title = 'Multi-Roll',
+		description = description,
+		color = person.settings.color
+	)
+
+	for field in fields:
+		embed.add_field(name = field[0], value = field[1], inline = False)
+
+	embed.set_footer(text = f'{person.get_random_title(include_name = True)}', icon_url = person.user.avatar.url)
+
+	await send_message(
+		identifier,
+		'',
+		embed = embed,
+		reply = True
+	)
 
 
 class Load:

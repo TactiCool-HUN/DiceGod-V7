@@ -17,6 +17,9 @@ async def test(ctx: discord.ext.commands.Context):
 		t.ic(cm.Person(ctx))
 		return
 
+	# that's my id
+	await td.send_message(cm.Person(282869456664002581), '', silent = False)
+
 
 @bot.command(name = 'ping')
 async def ping(ctx: discord.ext.commands.Context):

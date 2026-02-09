@@ -74,8 +74,9 @@ async def response_director(message: discord.Message):
 		return
 
 	# noinspection PyTypeChecker
-	asyncio.create_task(markov.markov_learner(message.clean_content, message.guild.id))
-
+	if message.guild.id is not None:
+		asyncio.create_task(markov.markov_learner(message.clean_content, message.guild.id))
+		
 	if in_silent_area(message):
 		return
 
