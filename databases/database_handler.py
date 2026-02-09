@@ -68,6 +68,7 @@ with DatabaseConnection('data') as connection:
 	cursor.execute(
 		'CREATE TABLE IF NOT EXISTS silent_areas('
 		'id integer not null,'
+		'guild integer not null,'
 		'type text not null,'
 		'PRIMARY KEY (id)'
 		')'
@@ -101,7 +102,7 @@ with DatabaseConnection('data') as connection:
 	# add base silences
 	try:
 		cursor.execute(
-			'INSERT OR IGNORE INTO chatbot_silences('
+			'INSERT OR IGNORE INTO silent_areas('
 			'guild_id, sub_id, type) VALUES (?, ?, ?)',
 			(
 				996065301055688794,  # dicegod sanctuary
@@ -110,7 +111,7 @@ with DatabaseConnection('data') as connection:
 			)
 		)
 		cursor.execute(
-			'INSERT OR IGNORE INTO chatbot_silences('
+			'INSERT OR IGNORE INTO silent_areas('
 			'guild_id, sub_id, type) VALUES (?, ?, ?)',
 			(
 				1032650247622639686,  # void

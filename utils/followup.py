@@ -17,11 +17,11 @@ async def followup(
 	# noinspection GrazieInspection
 	"""
 	:param identifier: TextChannel | Message | Interaction | Context | Member | Person
-	:param followup_type: str
-	:param text: str
-	:key options: dict[str, FollowupAction]
-	:key question: str
-	:key veto_power: list[Person]
+	:param followup_type: str ('poll')
+	:param text: str (message sent)
+	:key options: dict[str, FollowupAction] (for 'poll' followup type)
+	:key question: str (for 'poll' followup type)
+	:key veto_power: list[Person] (for 'poll' followup type)
 	:return: 
 	"""
 	if followup_type == 'poll':
@@ -45,9 +45,11 @@ async def followup(
 		veto_power: list[cm.Person] = kwargs.get('veto_power', [])
 		temp = None
 		currently_a_tie = False
+		veto = False
 		for answer in sent.poll.answers:
+			if veto:
+				break
 			if options.get(answer.text).power == 'veto':
-				veto = False
 				async for voter in answer.voters():
 					if cm.Person(voter).permission_level > 2:
 						veto = True
@@ -88,7 +90,6 @@ async def followup(
 		await action.value(*action.sub_values)
 	elif action.type == 'built-in':
 		if action.value == 'disable-self':
-			t.ic('disable-self')
 			return
 
 

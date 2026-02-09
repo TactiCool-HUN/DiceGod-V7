@@ -34,6 +34,13 @@ async def on_ready():
 			t.ic(f"Synced {len(synced)} command(s)")
 		except Exception as e:
 			t.ic(e)
+	else:
+		try:
+			bot.tree.copy_global_to(guild = discord.Object(id = settings.TEST_GUILD))
+			synced = await bot.tree.sync(guild = discord.Object(id = settings.TEST_GUILD))
+			t.ic(f"Synced {len(synced)} command(s) to the TEST guild")
+		except Exception as e:
+			t.ic(e)
 
 
 async def activity_changer():

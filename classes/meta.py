@@ -141,6 +141,9 @@ class Person:
 			)
 
 	def get_titles(self):
+		"""
+		:return: list of (title, tier) 
+		"""
 		with DatabaseConnection('data') as con:
 			cursor = con.cursor()
 			cursor.execute(

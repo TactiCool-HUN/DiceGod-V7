@@ -17,15 +17,13 @@ async def send_message(
 	:key reply: bool
 	:key silent: bool
 	:key embed: embed
-	:key edit_original_response: bool
 	:return: discord.Message
 	"""
 	ephemeral: bool = kwargs.get('ephemeral', False)
 	reply: bool = kwargs.get('reply', False)
 	silent: bool = kwargs.get('silent', True)
-	embed: discord.Embed | None = kwargs.get('embed', None)
-	poll: discord.Poll | None = kwargs.get('poll', None)
-	edit_original_response: bool = kwargs.get('edit_original_response', False)
+	embed: discord.Embed | None = kwargs.get('embed', discord.utils.MISSING)
+	poll: discord.Poll | None = kwargs.get('poll', discord.utils.MISSING)
 
 	sent: discord.Message | None = None
 
@@ -41,21 +39,12 @@ async def send_message(
 					silent = silent,
 					ephemeral = ephemeral,
 				)
-			except discord.InteractionResponded:
-				if edit_original_response:
-					sent: discord.Message = await identifier.edit_original_response(
-						content = text,
-						embed = embed,
-						poll = poll,
-					)
-				else:
-					sent: discord.Message = await identifier.followup.send_message(
-						content = text,
-						embed = embed,
-						poll = poll,
-						silent = silent,
-						ephemeral = ephemeral
-					)
+			except discord.errors.InteractionResponded:
+				sent: discord.Message = await identifier.edit_original_response(
+					content = text,
+					embed = embed,
+					poll = poll,
+				)
 		case discord.ext.commands.Context | discord.Message:
 			if isinstance(identifier, discord.Message):
 				reply = True

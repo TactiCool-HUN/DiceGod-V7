@@ -1,5 +1,6 @@
 VERSION: int = 0
 
+TEST_GUILD: int = 953258116496097340
 SYNC: bool = False
 LAUNCH_GOD: bool = True
 SILENT_DB: bool = False
