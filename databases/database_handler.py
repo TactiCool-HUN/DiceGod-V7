@@ -27,7 +27,7 @@ with DatabaseConnection('data') as connection:
 	cursor.execute(
 		'CREATE TABLE IF NOT EXISTS people('
 		'id integer,'
-		'name text,'
+		'name text,'  # discord official username
 		'discord_id integer,'
 		'permission_level integer default 0,'
 		'color text default "0x000000",'

@@ -48,7 +48,7 @@ class PermissionLevel:
 	@permission_level.setter
 	def permission_level(self, new_value: int | str):
 		if isinstance(new_value, str):
-			new_value = self._str_to_int[new_value]
+			new_value = self._str_to_int[new_value.lower()]
 		if isinstance(new_value, int):
 			if self.min() <= new_value <= self.max():
 				self._permission_level = new_value

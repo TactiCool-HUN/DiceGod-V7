@@ -17,7 +17,7 @@ class Person:
 		self.user: discord.User | None = None
 		self.member: discord.Member | None = None
 
-		self.permission_level: cms.PermissionLevel | None = None
+		self.permission_level: cms.PermissionLevel = cms.PermissionLevel('guest')
 		self.settings: cms.PersonalSettings = cms.PersonalSettings()
 
 		self._load(identifier, **kwargs)
@@ -43,11 +43,13 @@ class Person:
 			)
 
 	def _load(self, identifier: str | int | discord.ext.commands.Context | discord.Interaction | discord.User | discord.Member, **kwargs):
+		# Trying to find the person in the database.
 		if isinstance(identifier, discord.Interaction):
 			identifier = identifier.user
 		if isinstance(identifier, discord.ext.commands.Context):
 			identifier = identifier.author
 		
+		# First try the simplest case
 		if self.db_id != -1:
 			with DatabaseConnection('data') as con:
 				cursor = con.cursor()
@@ -62,8 +64,11 @@ class Person:
 			elif len(raw) == 0:
 				raise ValueError(f'Person does not exist in database. (tried to load person from db_id: {self.db_id})')
 		else:
+			# identifying from name has to be done based on
+			# the unique discord username
 			if isinstance(identifier, str):
 				self.user_name = identifier
+			# alternatively everything else gets discord ID
 			elif isinstance(identifier, int):
 				self.user = bot.get_user(identifier)
 				if self.user is None:
@@ -152,6 +157,7 @@ class Person:
 			for person_title in titles:
 				temp[person_title[0]] = int(person_title[1] == 'major') + 1
 			temp = t.choice(temp)
+			
 			if temp[:4].lower() == 'the':
 				title = f'{temp}'
 			else:
@@ -168,12 +174,14 @@ class Person:
 			return title
 
 	def add_response(self, response):
-		for line in self.get_responses():
-			if response == line[0]:
-				return False
+		# if it already exists FOR THIS PERSON it fails
+		if response in self.get_responses():
+			return False
 
 		with DatabaseConnection('data') as con:
 			cursor = con.cursor()
+			# check if someone else has the same response
+			# in which case it would only be added in the connector
 			cursor.execute(
 				'SELECT response FROM responses WHERE response = ?',
 				(response,)
@@ -201,7 +209,10 @@ class Person:
 
 		return True
 
-	def get_responses(self):
+	def get_responses(self) -> list[str]:
+		"""
+		Loads every response of the person.
+		"""
 		with DatabaseConnection('data') as con:
 			cursor = con.cursor()
 			cursor.execute(
@@ -214,7 +225,13 @@ class Person:
 				'WHERE pe.id = ?',
 				(self.db_id,)
 			)
-			return cursor.fetchall()
+			raw = cursor.fetchall()
+		
+		unpacked = []
+		for line in raw:
+			unpacked.append(line[0])
+		
+		return unpacked
 
 
 pass
