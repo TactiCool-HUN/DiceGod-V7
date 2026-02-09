@@ -262,37 +262,43 @@ async def silence_dicegod(interaction: discord.Interaction, silence_tier: int):
 		)
 
 
-@bot.command(name = 'reinvite_the_almighty', aliases = ['reinvite', 're-awaken'])
-async def reinvite_the_almighty(interaction: discord.Interaction, scope: str = ''):
+@bot.tree.command(name = 'reinvite_the_almighty', description = 'Admin only! Removes the silence from DiceGod chatbot in the area.')
+@discord.app_commands.choices(silence_tier = [
+	discord.app_commands.Choice(name = "Channel", value = 0),
+	discord.app_commands.Choice(name = "Category", value = 1),
+	discord.app_commands.Choice(name = "Guild", value = 2),
+])
+async def reinvite_the_almighty(interaction: discord.Interaction, silence_tier: int):
 	if cm.Person(interaction).permission_level < 3:
 		await td.send_message(interaction, 'Admin only command.')
 		return
 
-	if scope == 'channel':
+	if silence_tier == 'channel':
 		area_id = interaction.channel.id
-	elif scope == 'category':
+	elif silence_tier == 'category':
 		area_id = interaction.channel.category.id
-	elif scope == 'guild':
+	elif silence_tier == 'guild':
 		area_id = interaction.guild.id
 	else:
-		await td.send_message(interaction, 'Write \'channel\', \'category\', or \'guild\' after the command.')
-		return
+		raise ValueError('Invalid silence_tier.')
 
 	with DatabaseConnection('data') as con:
 		cursor = con.cursor()
 		cursor.execute(
-			'SELECT * FROM silent_areas WHERE id = ? AND type = ?',
+			'SELECT * FROM silent_areas WHERE id = ? AND guild = ? AND type = ?',
 			(
 				area_id,
-				scope
+				interaction.guild.id,
+				silence_tier
 			)
 		)
 		raw = cursor.fetchall()
 		cursor.execute(
-			'DELETE FROM silent_areas WHERE id = ? AND type = ?',
+			'DELETE FROM silent_areas WHERE id = ? AND guild = ? AND type = ?',
 			(
 				area_id,
-				scope
+				interaction.guild.id,
+				silence_tier
 			)
 		)
 
