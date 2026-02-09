@@ -1,6 +1,7 @@
 from utils.bot_setup import bot
 import classes.meta as cm
 import chatbot.chatbot as chatbot
+import chatbot.markov as markov
 import asyncio
 import discord
 import random
@@ -22,6 +23,7 @@ async def on_message(message: discord.Message):
 @bot.event
 async def on_ready():
 	asyncio.create_task(activity_changer())
+	asyncio.create_task(markov.markov_saver())
 
 	t.ic(f"{bot.user.name.upper()} is online!")
 

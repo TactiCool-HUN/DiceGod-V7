@@ -1,6 +1,13 @@
 from utils.bot_setup import bot
 from databases.database_handler import DatabaseConnection
+import databases.constants as c
+import classes.meta as cm
+import chatbot.markov as markov
+import utils.tools_discord as td
+import utils.tools as t
 import random
+import discord
+import asyncio
 
 
 def in_silent_area(message: discord.Message) -> bool:
@@ -67,7 +74,7 @@ async def response_director(message: discord.Message):
 		return
 
 	# noinspection PyTypeChecker
-	markov_learner(message.clean_content)
+	asyncio.create_task(markov.markov_learner(message.clean_content, message.guild.id))
 
 	if in_silent_area(message):
 		return
@@ -92,7 +99,7 @@ async def response_director(message: discord.Message):
 			text_rando('maybe'): 1,
 			'f"' + temp: 0.8,
 			'f"' + temp2: 0.2,
-			'f"{markovifier()}"': 2,
+			'f"{markov.markovifier()}"': 2,
 		}
 		for line in person.get_responses():
 			responses[line[0]] = 1
@@ -102,7 +109,7 @@ async def response_director(message: discord.Message):
 			response = t.eval_safe(response, {
 				'random_title': person.get_random_title,
 				'display_name': person.user.display_name,
-				'markovifier': markovifier,
+				'markov.markovifier': markov.markovifier,
 			})
 		await stealthifier(content, message, response)
 
@@ -111,7 +118,7 @@ async def response_director(message: discord.Message):
 	if 'meme' in content:
 		await stealthifier(content, message, text_rando('the DNA of the soul'))
 	if 'say what?' in content:
-		await stealthifier(content, message, text_rando('what?'))
+		await stealthifier(content, message, text_rando('what?', ending_rando = False))
 	if 'no u' in content or 'no you' in content and random.randint(1, 5) == 1:
 		await stealthifier(content, message, text_rando('no u'))
 

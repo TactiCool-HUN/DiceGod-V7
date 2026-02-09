@@ -15,7 +15,7 @@ max_order = 3
 
 async def markov_learner(text: str, guild: int):
 	text = text.replace("<@953258800759070720> ", "")
-	files_dict[guild] = f"{files_dict[guild]}\n{text}"
+	files_dict[guild] = f"{files_dict.get(guild, '')}\n{text}"
 
 
 async def markov_saver():
@@ -29,15 +29,15 @@ async def markov_saver():
 # noinspection SpellCheckingInspection
 def markovifier(guild: int):
 	text = files_dict[guild]
-	return markov_from_text(text, 100)
+	return _markov_from_text(text, 100)
 
 
-def markov_from_text(text: str, max_words = 100) -> str:
-	chain = build_chain(text)
-	return generate_message(chain, max_words)
+def _markov_from_text(text: str, max_words = 100) -> str:
+	chain = _build_chain(text)
+	return _generate_message(chain, max_words)
 	
 
-def build_chain(text):
+def _build_chain(text):
 	words = text.split()
 	chain = defaultdict(list)
 
@@ -51,7 +51,7 @@ def build_chain(text):
 	return chain
 
 
-def next_word(chain, context):
+def _next_word(chain, context):
 	for k in range(max_order, 0, -1):
 		key = tuple(context[-k:])
 		if key in chain:
@@ -59,12 +59,12 @@ def next_word(chain, context):
 	return random.choice(random.choice(list(chain.values())))
 
 
-def generate_message(chain, max_words):
+def _generate_message(chain, max_words):
 	start = random.choice(list(chain.keys()))
 	message = list(start)
 
 	while len(message) < max_words:
-		word = next_word(chain, message)
+		word = _next_word(chain, message)
 		message.append(word)
 
 	return ' '.join(message)
