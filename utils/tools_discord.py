@@ -158,7 +158,24 @@ async def send_roll(
 	for piece in roll_pieces:
 		if piece.type == 'die':
 			die = piece.value
-			embed.add_field(name = f'{die.amount}d{die.size}', value = '')
+			value = ''
+			first = True
+			for i, roll in enumerate(die.rolls):
+				if i % 2 == 0:
+					if not first:
+						value += '\n'
+					else:
+						first = False
+					if roll[1]:
+						value += f'Roll #{i + 1}: **{roll[0]}**'
+					else:
+						value += f'~~Roll #{i + 1}: **{roll[0]}**~~'
+				else:
+					if roll[1]:
+						value += f' | Roll #{i + 1}: **{roll[0]}**'
+					else:
+						value += f' | ~~Roll #{i + 1}: **{roll[0]}**~~'
+			embed.add_field(name = f'{die.amount}d{die.size}{die.modifiers}', value = value)
 
 	embed.set_footer(text = f'{person.get_random_title(include_name = True)}', icon_url = person.user.avatar.url)
 

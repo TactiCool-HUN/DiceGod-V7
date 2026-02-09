@@ -71,7 +71,7 @@ def create_roll_pieces(incoming_text: str) -> list[cd.RollPiece]:
 				continue
 		
 		if current_sequence == 'roll_modifier':
-			if char not in ['+', '-', '*', '/', '(', ')']:
+			if char not in ['+', '-', '*', '/', '(', ')', '[', ']']:
 				piece.value += char
 				continue
 			else:

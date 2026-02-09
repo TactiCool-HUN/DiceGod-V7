@@ -62,6 +62,7 @@ class Die:
 			if roll[1]:
 				self.total += roll[0]
 		
+		self.rolls = rolls_temp
 		self.is_resolved = True
 	
 	def __repr__(self):

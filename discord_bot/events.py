@@ -72,7 +72,7 @@ async def activity_changer():
 						"ORDER BY RANDOM() "
 						"LIMIT 1;"
 					)
-					person = cm.Person(db_id = cursor.fetchone())
+					person = cm.Person(db_id = cursor.fetchone()[0])
 					
 				choices = {
 					"Watching PCs die": 1,
@@ -81,7 +81,7 @@ async def activity_changer():
 					"Watching Fanki rolling nat1s": 0.4,
 					"Watching Popa rolling nat20s": 0.4,
 					"Watching people derail the campaign": 1,
-					f"Watching {person.user.display_name}... :)": 1,
+					f"Watching {person.user.display_name}... :)": 2,
 				}
 				activity = discord.Activity(name = t.choice(choices), type = 3)
 			case 3:  # competing in (has been removed from dc)
