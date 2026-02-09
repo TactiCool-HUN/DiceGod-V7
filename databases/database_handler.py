@@ -103,7 +103,7 @@ with DatabaseConnection('data') as connection:
 	try:
 		cursor.execute(
 			'INSERT OR IGNORE INTO silent_areas('
-			'guild_id, sub_id, type) VALUES (?, ?, ?)',
+			'id, guild, type) VALUES (?, ?, ?)',
 			(
 				996065301055688794,  # dicegod sanctuary
 				562373378967732226,  # rpg corner
@@ -112,7 +112,7 @@ with DatabaseConnection('data') as connection:
 		)
 		cursor.execute(
 			'INSERT OR IGNORE INTO silent_areas('
-			'guild_id, sub_id, type) VALUES (?, ?, ?)',
+			'id, guild, type) VALUES (?, ?, ?)',
 			(
 				1032650247622639686,  # void
 				562373378967732226,  # rpg corner

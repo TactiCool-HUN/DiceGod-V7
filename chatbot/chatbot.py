@@ -19,15 +19,12 @@ def in_silent_area(message: discord.Message) -> bool:
 		raw = cursor.fetchall()
 
 	for line in raw:
-		if line[1] == 'channel':
-			if message.channel.id == line[0]:
-				return True
-		elif line[1] == 'category':
-			if message.channel.category.id == line[0]:
-				return True
-		elif line[1] == 'guild':
-			if message.guild.id == line[0]:
-				return True
+		if line[2] == 'channel' and message.guild.id == line[1] and message.channel.id == line[0]:
+			return True
+		elif line[2] == 'category' and message.guild.id == line[1] and message.channel.category.id == line[0]:
+			return True
+		elif line[2] == 'guild' and message.guild.id == line[0]:
+			return True
 
 	return False
 
@@ -74,14 +71,12 @@ async def response_director(message: discord.Message):
 		return
 
 	# noinspection PyTypeChecker
+	content: str = message.clean_content
 	if message.guild.id is not None:
-		asyncio.create_task(markov.markov_learner(message.clean_content, message.guild.id))
-		
+		asyncio.create_task(markov.markov_learner(content, message.guild.id))
+
 	if in_silent_area(message):
 		return
-
-	# noinspection PyTypeChecker
-	content: str = message.clean_content
 	chatty_triggered = False
 
 	if bot.user.mentioned_in(message):
@@ -111,6 +106,7 @@ async def response_director(message: discord.Message):
 				'random_title': person.get_random_title,
 				'display_name': person.user.display_name,
 				'markov.markovifier': markov.markovifier,
+				'markov': markov,
 			})
 		await stealthifier(content, message, response)
 

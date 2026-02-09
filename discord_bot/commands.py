@@ -231,11 +231,11 @@ async def add_personal_response(interaction: discord.Interaction, response: str,
 
 @bot.tree.command(name = 'doom_to_eternal_silence', description = 'Admin only! Silences DiceGod chatbot in the area.')
 @discord.app_commands.choices(silence_tier = [
-	discord.app_commands.Choice(name = "Channel", value = 0),
-	discord.app_commands.Choice(name = "Category", value = 1),
-	discord.app_commands.Choice(name = "Guild", value = 2),
+	discord.app_commands.Choice(name = 'Channel', value = 'channel'),
+	discord.app_commands.Choice(name = 'Category', value = 'category'),
+	discord.app_commands.Choice(name = 'Guild', value = 'guild'),
 ])
-async def silence_dicegod(interaction: discord.Interaction, silence_tier: int):
+async def silence_dicegod(interaction: discord.Interaction, silence_tier: str):
 	if cm.Person(interaction).permission_level < 3:
 		await td.send_message(interaction, 'Admin only command.')
 		return
@@ -260,15 +260,17 @@ async def silence_dicegod(interaction: discord.Interaction, silence_tier: int):
 				silence_tier
 			)
 		)
+	
+	await td.send_message(interaction, '> An uneasy silence befalls the land.')
 
 
 @bot.tree.command(name = 'reinvite_the_almighty', description = 'Admin only! Removes the silence from DiceGod chatbot in the area.')
 @discord.app_commands.choices(silence_tier = [
-	discord.app_commands.Choice(name = "Channel", value = 0),
-	discord.app_commands.Choice(name = "Category", value = 1),
-	discord.app_commands.Choice(name = "Guild", value = 2),
+	discord.app_commands.Choice(name = 'Channel', value = 'channel'),
+	discord.app_commands.Choice(name = 'Category', value = 'category'),
+	discord.app_commands.Choice(name = 'Guild', value = 'guild'),
 ])
-async def reinvite_the_almighty(interaction: discord.Interaction, silence_tier: int):
+async def reinvite_the_almighty(interaction: discord.Interaction, silence_tier: str):
 	if cm.Person(interaction).permission_level < 3:
 		await td.send_message(interaction, 'Admin only command.')
 		return
