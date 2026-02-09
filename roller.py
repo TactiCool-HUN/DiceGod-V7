@@ -12,6 +12,7 @@ async def roll_initiation(
 ):
 	text = text.lower().replace(' ', '').replace('\\', '')
 
+	# checking mixed-up commands
 	if text[:4] in ['coinflip', 'coin']:
 		if isinstance(identifier, discord.Interaction):
 			from discord_bot.commands import coin_slash
@@ -22,8 +23,10 @@ async def roll_initiation(
 			await identifier.invoke(command)
 		return
 
+	# dice roll
 	async with td.Load(interaction = identifier, text = text):
 		roll_pieces: list[cd.RollPiece] = roll_parse(text)
+		
 		if multiplier == 1:
 			roll_pack = [roll_pieces, evaluate(roll_pieces)]
 			await td.send_roll(identifier, roll_pack)
@@ -74,7 +77,8 @@ def create_roll_pieces(incoming_text: str) -> list[cd.RollPiece]:
 			else:
 				roll_pieces.append(piece)
 				current_sequence = None
-				
+		
+		# new sequence
 		if current_sequence is None:
 			if char.isnumeric():
 				current_sequence = 'number'
@@ -139,7 +143,7 @@ def parentheses_solver(roll_pieces: list[cd.RollPiece]) -> list[cd.RollPiece]:
 	while i < len(roll_pieces):
 		if roll_pieces[i] == '(':
 			start = i
-		if roll_pieces[i] == ')':
+		elif roll_pieces[i] == ')':
 			layer_piece = cd.RollPiece('roll_piece', roll_pieces[start+1:i])
 			
 			if roll_pieces[i + 1].type == 'damage_type':
@@ -149,7 +153,7 @@ def parentheses_solver(roll_pieces: list[cd.RollPiece]) -> list[cd.RollPiece]:
 				roll_pieces = roll_pieces[:start] + [layer_piece] + roll_pieces[i+1:]
 			i = 0
 			continue
-		if roll_pieces[i].type == 'damage_type':
+		elif roll_pieces[i].type == 'damage_type':
 			roll_pieces[i - 1].damage_type = roll_pieces[i].value
 			del roll_pieces[i]
 			continue
