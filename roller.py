@@ -109,6 +109,8 @@ def create_roll_pieces(incoming_text: str) -> list[cd.RollPiece]:
 				continue
 			elif char in ['(', ')']:
 				roll_pieces.append(cd.RollPiece('parentheses', char))
+				current_sequence = None
+				piece = None
 			elif roll_pieces[-1].type == 'number' and roll_pieces[-2].type == 'operator' and roll_pieces[-2] == 'd':
 				current_sequence = 'roll_modifier'
 				piece = cd.RollPiece(current_sequence, char)
@@ -116,7 +118,8 @@ def create_roll_pieces(incoming_text: str) -> list[cd.RollPiece]:
 			else:
 				raise ValueError('Unexpected value at: roll_resolve() -> new sequence')
 
-	roll_pieces.append(piece)
+	if piece:
+		roll_pieces.append(piece)
 	return roll_pieces
 
 
@@ -162,11 +165,14 @@ def parentheses_solver(roll_pieces: list[cd.RollPiece]) -> list[cd.RollPiece]:
 		elif roll_pieces[i] == ')':
 			layer_piece = cd.RollPiece('roll_piece', roll_pieces[start+1:i])
 			
-			if roll_pieces[i + 1].type == 'damage_type':
-				layer_piece.damage_type = roll_pieces[i + 1].value
-				roll_pieces = roll_pieces[:start] + [layer_piece] + roll_pieces[i+2:]
+			if len(roll_pieces) > i + 1:
+				if roll_pieces[i + 1].type == 'damage_type':
+					layer_piece.damage_type = roll_pieces[i + 1].value
+					roll_pieces = roll_pieces[:start] + [layer_piece] + roll_pieces[i+2:]
+				else:
+					roll_pieces = roll_pieces[:start] + [layer_piece] + roll_pieces[i+1:]
 			else:
-				roll_pieces = roll_pieces[:start] + [layer_piece] + roll_pieces[i+1:]
+				roll_pieces = roll_pieces[:start] + [layer_piece]
 			i = 0
 			continue
 		elif roll_pieces[i].type == 'damage_type':

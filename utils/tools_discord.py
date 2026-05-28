@@ -135,6 +135,57 @@ def roll_recursive_builder(roll_pieces: list[cd.RollPiece], unresolved: bool = F
 	return f"({' '.join(builder)})"
 
 
+def roll_recursive_fields(roll_pieces: list[cd.RollPiece], person: cm.Person) -> list:
+	fields = []
+	for part in roll_pieces:
+		if part.type == 'roll_piece':
+			fields = fields + roll_recursive_fields(part.value, person)
+		elif part.type == 'die':
+			die: cd.Die = part.value
+			value = ''
+			first = True
+			for i, roll in enumerate(die.rolls):
+				if i % 2 == 0:
+					if not first:
+						value += '\n'
+					else:
+						first = False
+					if roll[1]:
+						value += f'Roll #{i + 1}: **{roll[0]}**'
+					else:
+						value += f'~~Roll #{i + 1}: **{roll[0]}**~~'
+				else:
+					if roll[1]:
+						value += f' | Roll #{i + 1}: **{roll[0]}**'
+					else:
+						value += f' | ~~Roll #{i + 1}: **{roll[0]}**~~'
+
+				with DatabaseConnection('data') as con:
+					cursor = con.cursor()
+					cursor.execute(
+						'INSERT INTO statistics('
+						'owner_id,'
+						'outcome,'
+						'size,'
+						'used,'
+						'die_text,'
+						'date'
+						') VALUES (?, ?, ?, ?, ?, ?)',
+						(
+							person.user.id,
+							roll[0],
+							die.size,
+							roll[1],
+							f'{die.amount}d{die.size}{die.modifiers}',
+							datetime.datetime.now()
+						)
+					)
+
+			fields.append([f'{die.amount}d{die.size}{die.modifiers}', value])
+		
+	return fields
+
+
 async def send_roll(
 		identifier: discord.Interaction | discord.ext.commands.Context,
 		roll_pieces: list[list[cd.RollPiece]]
@@ -167,50 +218,10 @@ async def send_roll(
 		description = description,
 		color = person.settings.color
 	)
-	
-	for piece in roll_pieces:
-		if piece.type == 'die':
-			die: cd.Die = piece.value
-			value = ''
-			first = True
-			for i, roll in enumerate(die.rolls):
-				if i % 2 == 0:
-					if not first:
-						value += '\n'
-					else:
-						first = False
-					if roll[1]:
-						value += f'Roll #{i + 1}: **{roll[0]}**'
-					else:
-						value += f'~~Roll #{i + 1}: **{roll[0]}**~~'
-				else:
-					if roll[1]:
-						value += f' | Roll #{i + 1}: **{roll[0]}**'
-					else:
-						value += f' | ~~Roll #{i + 1}: **{roll[0]}**~~'
-			
-				with DatabaseConnection('data') as con:
-					cursor = con.cursor()
-					cursor.execute(
-						'INSERT INTO statistics('
-						'owner_id,'
-						'outcome,'
-						'size,'
-						'used,'
-						'die_text,'
-						'date'
-						') VALUES (?, ?, ?, ?, ?, ?)',
-						(
-							person.user.id,
-							roll[0],
-							die.size,
-							roll[1],
-							f'{die.amount}d{die.size}{die.modifiers}',
-							datetime.datetime.now()
-						)
-					)
-			
-			embed.add_field(name = f'{die.amount}d{die.size}{die.modifiers}', value = value)
+
+	fields = roll_recursive_fields(roll_pieces, person)
+	for field in fields:
+		embed.add_field(name = field[0], value = field[1])
 
 	embed.set_footer(text = f'{person.get_random_title(include_name = True)}', icon_url = person.user.avatar.url)
 	
