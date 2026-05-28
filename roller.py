@@ -192,7 +192,7 @@ def evaluate(roll_pieces: list[cd.RollPiece], ignore_resolve_error: bool = False
 	i = 0
 	while i < len(roll_pieces):
 		if roll_pieces[i].type == 'roll_piece':
-			temp = evaluate(roll_pieces[i].value)
+			temp = evaluate(roll_pieces[i].value, ignore_resolve_error)
 			if roll_pieces[i].damage_type is not None:
 				for roll_piece in temp:
 					roll_piece.damage_type = roll_pieces[i].damage_type
