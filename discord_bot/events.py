@@ -25,6 +25,7 @@ async def on_message(message: discord.Message):
 async def on_ready():
 	asyncio.create_task(activity_changer())
 	asyncio.create_task(markov.markov_saver())
+	# TODO: load followup saves
 
 	t.ic(f"{bot.user.name.upper()} is online!")
 
@@ -137,7 +138,7 @@ async def activity_changer():
 			case 3:  # competing in (has been removed from dc)
 				choices = {
 					"Competing for a T-Rex": 1,
-					"Competing in a TPK competition": 1,
+					"Competing to TPK the party": 1,
 					"Competing with Foundry": 1,
 				}
 				activity = discord.Activity(name = t.choice(choices), type = 5)

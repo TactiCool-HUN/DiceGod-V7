@@ -6,7 +6,7 @@ import classes.dicebot as cd
 import copy
 
 
-async def roll_initiation(
+async def roll_preparser(
 		identifier: discord.Interaction | discord.ext.commands.Context,
 		text: str,
 		multiplier: int = 1
@@ -23,19 +23,33 @@ async def roll_initiation(
 			# noinspection PyTypeChecker
 			await identifier.invoke(command)
 		return
+	
+	await roll_initiation(identifier, text, multiplier)
 
+
+async def roll_initiation(
+		identifier: discord.Interaction | discord.ext.commands.Context,
+		text: str,
+		multiplier: int = 1,
+		reroll_pieces: list[cd.RollPiece] = None
+):
 	# dice roll
 	async with td.Load(interaction = identifier, text = text):
-		roll_pieces: list[cd.RollPiece] = roll_parse(text)
+		if reroll_pieces is None:
+			roll_pieces: list[cd.RollPiece] = roll_parse(text)
+			ignore_resolve_error = False
+		else:
+			roll_pieces: list[cd.RollPiece] = reroll_pieces
+			ignore_resolve_error = True
 		
 		if multiplier == 1:
-			roll_pack = [roll_pieces, evaluate(roll_pieces)]
+			roll_pack = [roll_pieces, evaluate(roll_pieces, ignore_resolve_error)]
 			await td.send_roll(identifier, roll_pack)
 		else:
 			packed_roll_pack = []
 			for _ in range(multiplier):
 				roll_pieces_copy = copy.deepcopy(roll_pieces)
-				packed_roll_pack.append([roll_pieces_copy, evaluate(roll_pieces_copy)])
+				packed_roll_pack.append([roll_pieces_copy, evaluate(roll_pieces_copy, ignore_resolve_error)])
 			await td.send_pack(identifier, packed_roll_pack)
 
 
@@ -164,10 +178,10 @@ def parentheses_solver(roll_pieces: list[cd.RollPiece]) -> list[cd.RollPiece]:
 	return roll_pieces
 
 
-def evaluate(roll_pieces: list[cd.RollPiece]) -> list[cd.RollPiece]:
+def evaluate(roll_pieces: list[cd.RollPiece], ignore_resolve_error: bool = False) -> list[cd.RollPiece]:
 	for piece in roll_pieces:
 		if piece.type == 'die':
-			piece.value.evaluate()
+			piece.value.evaluate(ignore_resolve_error)
 	
 	i = 0
 	while i < len(roll_pieces):

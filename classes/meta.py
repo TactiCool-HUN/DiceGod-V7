@@ -172,7 +172,7 @@ class Person:
 			if title:
 				return f'{self.user.display_name}, {title}'
 			else:
-				return f'{self.user.display_name}, *an* Untitled'
+				return f'{self.user.display_name}, an untitled'
 		else:
 			return title
 

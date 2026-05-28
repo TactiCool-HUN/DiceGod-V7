@@ -2,9 +2,12 @@ import discord.ext
 import classes.meta as cm
 import classes.dicebot as cd
 import utils.tools as t
+import utils.followup as uf
 import databases.constants as c
 from databases.database_handler import DatabaseConnection
 import datetime
+
+from utils.followup import FollowupButton
 
 
 async def send_message(
@@ -19,6 +22,8 @@ async def send_message(
 	:key reply: bool
 	:key silent: bool
 	:key embed: embed
+	:key followups: list[FollowupButton]
+	:key poll: discord.Poll
 	:return: discord.Message
 	"""
 	ephemeral: bool = kwargs.get('ephemeral', False)
@@ -26,6 +31,11 @@ async def send_message(
 	silent: bool = kwargs.get('silent', True)
 	embed: discord.Embed | None = kwargs.get('embed', discord.utils.MISSING)
 	poll: discord.Poll | None = kwargs.get('poll', discord.utils.MISSING)
+	followups: list[FollowupButton] = kwargs.get('followups', None)
+	if followups:
+		view: discord.ui.View = uf.get_followup_view(followups)
+	else:
+		view: discord.ui.View = discord.ui.View()
 
 	sent: discord.Message | None = None
 
@@ -40,12 +50,14 @@ async def send_message(
 					poll = poll,
 					silent = silent,
 					ephemeral = ephemeral,
+					view = view,
 				)
 			except discord.errors.InteractionResponded:
 				sent: discord.Message = await identifier.edit_original_response(
 					content = text,
 					embed = embed,
 					poll = poll,
+					view = view,
 				)
 		case discord.ext.commands.Context | discord.Message:
 			if isinstance(identifier, discord.Message):
@@ -59,14 +71,16 @@ async def send_message(
 					content = text,
 					embed = embed,
 					poll = poll,
-					silent = silent
+					silent = silent,
+					view = view,
 				)
 			else:
 				sent: discord.Message = await identifier.send(
 					content = text,
 					embed = embed,
 					poll = poll,
-					silent = silent
+					silent = silent,
+					view = view,
 				)
 		case discord.User | discord.Member | cm.Person:
 			if isinstance(identifier, cm.Person):
@@ -79,7 +93,8 @@ async def send_message(
 				content = text,
 				embed = embed,
 				poll = poll,
-				silent = silent
+				silent = silent,
+				view = view,
 			)
 		case discord.TextChannel:
 			identifier: discord.TextChannel
@@ -87,7 +102,8 @@ async def send_message(
 				content = text,
 				embed = embed,
 				poll = poll,
-				silent = silent
+				silent = silent,
+				view = view,
 			)
 		case _:
 			raise TypeError(f"invalid Identifier type in dt.send_message()\nIdentifier type: {type(identifier)}\nIdentifier: {identifier}")
@@ -95,6 +111,9 @@ async def send_message(
 	if sent is None:
 		raise ValueError('sent is none?!')
 	else:
+		if followups:
+			view.message = sent
+			await sent.edit(view = view)
 		return sent
 
 
@@ -194,12 +213,20 @@ async def send_roll(
 			embed.add_field(name = f'{die.amount}d{die.size}{die.modifiers}', value = value)
 
 	embed.set_footer(text = f'{person.get_random_title(include_name = True)}', icon_url = person.user.avatar.url)
+	
+	from roller import roll_initiation
+	followups = [uf.FollowupButton(
+		'\U0001F504',
+		'',
+		uf.cfs.FollowupAction('async-function', roll_initiation, [identifier, '', 1, roll_pieces])
+	)]
 
 	await send_message(
 		identifier,
 		'',
 		embed = embed,
-		reply = True
+		reply = True,
+		followups = followups,
 	)
 
 
@@ -265,11 +292,19 @@ async def send_pack(
 
 	embed.set_footer(text = f'{person.get_random_title(include_name = True)}', icon_url = person.user.avatar.url)
 
+	from roller import roll_initiation
+	followups = [uf.FollowupButton(
+		'\U0001F504',
+		'',
+		uf.cfs.FollowupAction('async-function', roll_initiation, [identifier, '', len(packed_roll_pack), packed_roll_pack[0][0]])
+	)]
+
 	await send_message(
 		identifier,
 		'',
 		embed = embed,
-		reply = True
+		reply = True,
+		followups = followups,
 	)
 
 

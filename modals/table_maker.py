@@ -69,7 +69,7 @@ class TableMakerModalOne(discord.ui.Modal, title = "Create Table"):
 		view.add_item(button)
 
 		await interaction.response.send_message(
-			content = "Because Discord is not smart you need to press a button for the remaining 4 questions...",
+			content = "Because Discord is not smart you need to press a button for the remaining 4 questions...\nNote: it'll take 10-20 seconds for DiceGod to complete once you submit.",
 			view = view,
 			ephemeral = True
 		)

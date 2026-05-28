@@ -86,15 +86,15 @@ async def response_director(message: discord.Message):
 	elif 'dg' in content.replace(' ', '').lower():
 		chatty_triggered = True
 
-	temp = text_rando('{random_title(True)} has spoken', case_rando = False) + '"'
-	temp2 = text_rando('{display_name} has spoken', case_rando = False) + '"'
 	if chatty_triggered:
+		title_spoken = text_rando('{random_title(True)} has spoken', case_rando = False) + '"'
+		name_spoken = text_rando('{display_name} has spoken', case_rando = False) + '"'
 		responses = {
 			text_rando('yes'): int(person.permission_level),
 			text_rando('no'): 4 - int(person.permission_level),
 			text_rando('maybe'): 1,
-			'f"' + temp: 0.8,
-			'f"' + temp2: 0.2,
+			'f"' + title_spoken: 0.4,
+			'f"' + name_spoken: 0.05,
 			'f"{markov.markovifier()}"': 2,
 		}
 		for line in person.get_responses():

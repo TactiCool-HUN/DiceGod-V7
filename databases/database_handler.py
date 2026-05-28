@@ -95,6 +95,21 @@ with DatabaseConnection('data') as connection:
 		'role_id integer not null,'
 		'guest_id integer not null,'
 		'PRIMARY KEY (id)'
+		')'
+	)
+	# - - - followup_saves - - -
+	cursor.execute(
+		'CREATE TABLE IF NOT EXISTS followup_saves('
+		'id integer not null,'
+		'guild_id integer not null,'
+		'channel_id integer not null,'
+		'message_id integer not null,'
+		'followup_type text not null,'
+		'options text,'
+		'veto_power text,'
+		'expire_date timestamp not null,'
+		'PRIMARY KEY (id)'
+		')'
 	)
 
 	# add creator

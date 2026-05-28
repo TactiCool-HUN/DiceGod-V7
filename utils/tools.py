@@ -145,6 +145,7 @@ def most_frequent(list_inc):
 
 
 def eval_safe(template: str, safe_locals: dict = None):
+	print(f'safe eval: {template}; {safe_locals}')
 	safe_globals = {
 		"__builtins__": {
 			"str": str,

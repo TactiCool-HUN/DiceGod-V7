@@ -6,7 +6,7 @@ from utils.bot_setup import bot
 import utils.tools as t
 import utils.tools_discord as td
 import classes.meta as cm
-import classes.utility as cu
+import classes.followup_support as cfs
 import roller
 import asyncio
 import discord
@@ -54,17 +54,40 @@ async def emoji_command(ctx: discord.ext.commands.Context):
 	t.ic(ctx.message.clean_content)
 
 
+@bot.command(name = 'pop')
+async def pop_command(ctx: discord.ext.commands.Context):
+	cm.Person(ctx)
+	await td.send_message(ctx, "||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||")
+
+
 # noinspection SpellCheckingInspection
 @bot.command(name = 'roll', aliases = ['r', 'e', 'rollthosegoddamndicealready', 'rtgdda'])
-async def roll_command(ctx: discord.ext.commands.Context, *, text):
-	await roller.roll_initiation(ctx, text)
+async def roll_command(ctx: discord.ext.commands.Context, *, text: str):
+	multiplier = False
+	num = ''
+	for char in text:
+		if char.isnumeric():
+			num = f'{num}{char}'
+		elif char.lower() == 'x':
+			multiplier = char
+			break
+		else:
+			break
+	
+	if multiplier:
+		text = text.replace(f'{num}{multiplier}', '')
+		multiplier = int(num)
+	else:
+		multiplier = 1
+
+	await roller.roll_preparser(ctx, text, multiplier)
 
 
 @bot.tree.command(name = 'roll-multi', description = 'Roll the same dice multiple times.')
 @discord.app_commands.describe(multiplier = 'how many times?')
 @discord.app_commands.describe(roll = 'roll expression')
 async def multi_roll(interaction: discord.Interaction, multiplier: int, roll: str):
-	await roller.roll_initiation(interaction, roll, multiplier)
+	await roller.roll_preparser(interaction, roll, multiplier)
 
 
 @bot.command(name = 'coinflip', aliases = ['coin', 'c'])
@@ -165,23 +188,12 @@ async def award_title(interaction: discord.Interaction, title: str, target: disc
 	await followup(
 		interaction,
 		'poll',
-		f"{person.user.mention} has called a vote to add the ``{title}`` {tier} title to {target.user.mention}.",
+		f'{person.user.mention} has called a vote to add the ``{title}`` {tier} title to {target.user.mention}.',
 		question = 'Are you in support?',
 		options = {
-			'Yes': cu.FollowupAction(
-				'function',
-				_force_title,
-				[title, target, tier]
-			),
-			'No': cu.FollowupAction(
-				'built-in',
-				'disable-self'
-			),
-			f'Veto (only for admins and {target.user.display_name})': cu.FollowupAction(
-				'built-in',
-				'disable-self',
-				power = 'veto',
-			),
+			'Yes': cfs.FollowupAction('function', _force_title, [title, target, tier]),
+			'No': cfs.FollowupAction('built-in', 'disable-self'),
+			f'Veto (only for admins and {target.user.display_name})': cfs.FollowupAction('built-in', 'disable-self', note = 'veto'),
 		},
 		veto_power = [target]
 	)
@@ -338,18 +350,18 @@ async def kill_command(ctx: discord.ext.commands.Context, *, other = None):
 		result = t.choice(response_list)
 	if result[0] == "-":
 		sent = await td.send_message(ctx, text = result, reply = True)
-		sent = await sent.reply("Contacting Pinkertons, please do not leave your current area. (○)")
-		for i in range(20):
+		await sent.reply("Contacting Pinkertons, please do not leave your current area. (○)")
+		for i in range(10):
 			if i % 2 == 0:
-				await sent.edit(content = "Contacting Pinkertons, please do not leave your current area. (●)")
+				await sent.reply("Contacting Pinkertons, please do not leave your current area. (●)")
 			else:
-				await sent.edit(content = "Contacting Pinkertons, please do not leave your current area. (○)")
+				await sent.reply("Contacting Pinkertons, please do not leave your current area. (○)")
 			await asyncio.sleep(1)
-		await sent.edit(content = "Pinkertons connection established: Publishing address.")
+		await sent.reply(content = "Pinkertons connection established: Publishing address.")
 		await asyncio.sleep(5)
-		await sent.edit(content = "Pinkertons connection established: Requesting agent.")
+		await sent.reply(content = "Pinkertons connection established: Requesting agent.")
 		await asyncio.sleep(6)
-		await sent.edit(content = "Pinkertons connection established: Agent granted.\nStandby for annihilation.")
+		await sent.reply(content = "Pinkertons connection established: Agent granted.\nStandby for annihilation.")
 	else:
 		await td.send_message(ctx, text = result, reply = True)
 
@@ -357,10 +369,10 @@ async def kill_command(ctx: discord.ext.commands.Context, *, other = None):
 @bot.tree.command(name = 'statistics', description = 'Display your or others roll statistics.')
 @discord.app_commands.describe(person = '@ the person you want to get statistics about.')
 @discord.app_commands.choices(get_all_rolls = [
-	discord.app_commands.Choice(name = 'Yes', value = True),
-	discord.app_commands.Choice(name = 'No', value = False),
+	discord.app_commands.Choice(name = 'Yes', value = 1),
+	discord.app_commands.Choice(name = 'No', value = 0),
 ])
-async def statistics(interaction: discord.Interaction, person: discord.Member = None, get_all_rolls: bool = False):
+async def statistics(interaction: discord.Interaction, person: discord.Member = None, get_all_rolls: int = 0):
 	initiator = cm.Person(interaction)
 	
 	if person:
