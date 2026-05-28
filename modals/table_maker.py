@@ -147,13 +147,13 @@ class TableMakerModalTwo(discord.ui.Modal, title = "Create Table"):
 		guild = interaction.guild
 		main_role = await guild.create_role(
 			name = self.main_role_name,
-			colour = literal_eval(f"0x{self.main_role_color[1:]}"),
+			colour = literal_eval(f"0x{self.main_role_color[1:]}"), # safety-wrapper-eval
 			mentionable = True,
 			reason = f"Requested by {interaction.user.name}."
 		)
 		guest_role = await guild.create_role(
 			name = self.guest_role_name,
-			colour = literal_eval(f"0x{self.guest_role_color[1:]}"),
+			colour = literal_eval(f"0x{self.guest_role_color[1:]}"), # safety-wrapper-eval
 			mentionable = True,
 			reason = f"Requested by {interaction.user.name}."
 		)
