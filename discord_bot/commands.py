@@ -485,10 +485,10 @@ async def copy_db(interaction: discord.Interaction):
 	with DatabaseConnection('data.db') as connection:
 		cursor = connection.cursor()
 		for roll in rolls:
-			roll = roll[1:6] + roll[7:]  # drop index 0 and 6
+			roll = roll[:6] + roll[7:]  # drop index 0 and 6
 			if roll[5]:
 				cursor.execute(
-					'INSERT INTO statistics VALUES (?,?,?,?,?,?)',
+					'INSERT INTO statistics VALUES (?,?,?,?,?,?,?)',
 					roll
 				)
 

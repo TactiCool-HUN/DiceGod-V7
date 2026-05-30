@@ -1,5 +1,6 @@
 /tokens/
 /databases/data.db
+/databases/old_data.db
 /.idea/*
 /venv/*
 /databases/markov_studies/
