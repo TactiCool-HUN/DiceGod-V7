@@ -34,16 +34,20 @@ def text_rando(text: str, **kwargs) -> str:
 	ending_rando = kwargs.get('ending_rando', True)
 
 	if case_rando:
-		match random.randint(1, 6):
+		match random.randint(1, 20):
 			case 1:
 				text = text.upper()
 			case 2:
+				text = text.capitalize()
+			case 3:
+				text = text.capitalize()
+			case 4:
 				text = text.capitalize()
 			case _:
 				pass
 
 	if ending_rando:
-		match random.randint(1, 8):
+		match random.randint(1, 20):
 			case 1:
 				text += '.'
 			case 2:
@@ -108,6 +112,7 @@ async def response_director(message: discord.Message):
 				'markov.markovifier': markov.markovifier,
 				'markov': markov,
 				'message.guild.id': message.guild.id,
+				'message': message,
 			})
 		await stealthifier(content, message, response)
 
