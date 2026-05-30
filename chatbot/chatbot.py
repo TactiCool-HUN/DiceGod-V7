@@ -2,7 +2,7 @@ from utils.bot_setup import bot
 from databases.database_handler import DatabaseConnection
 import databases.constants as c
 import classes.meta as cm
-import chatbot.markov as markov
+import markov as markov
 import utils.tools_discord as td
 import utils.tools as t
 import random
@@ -95,7 +95,7 @@ async def response_director(message: discord.Message):
 			text_rando('maybe'): 1,
 			'f"' + title_spoken: 0.4,
 			'f"' + name_spoken: 0.05,
-			'f"{markov.markovifier()}"': 2,
+			'f"{markov.markovifier(message.guild.id)}"': 2,
 		}
 		for line in person.get_responses():
 			responses[line[0]] = 1
@@ -107,6 +107,7 @@ async def response_director(message: discord.Message):
 				'display_name': person.user.display_name,
 				'markov.markovifier': markov.markovifier,
 				'markov': markov,
+				'message.guild.id': message.guild.id,
 			})
 		await stealthifier(content, message, response)
 
