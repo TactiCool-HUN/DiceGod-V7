@@ -350,18 +350,18 @@ async def kill_command(ctx: discord.ext.commands.Context, *, other = None):
 		result = t.choice(response_list)
 	if result[0] == "-":
 		sent = await td.send_message(ctx, text = result, reply = True)
-		await sent.reply("Contacting Pinkertons, please do not leave your current area. (○)")
+		contacting = await sent.reply("Contacting Pinkertons, please do not leave your current area. (○)")
 		for i in range(10):
 			if i % 2 == 0:
-				await sent.reply("Contacting Pinkertons, please do not leave your current area. (●)")
+				await contacting.edit(content = "Contacting Pinkertons, please do not leave your current area. (●)")
 			else:
-				await sent.reply("Contacting Pinkertons, please do not leave your current area. (○)")
+				await contacting.edit(content = "Contacting Pinkertons, please do not leave your current area. (○)")
 			await asyncio.sleep(1)
-		await sent.reply(content = "Pinkertons connection established: Publishing address.")
+		await sent.reply("Pinkertons connection established: Publishing address.")
 		await asyncio.sleep(5)
-		await sent.reply(content = "Pinkertons connection established: Requesting agent.")
+		await sent.reply("Pinkertons connection established: Requesting agent.")
 		await asyncio.sleep(6)
-		await sent.reply(content = "Pinkertons connection established: Agent granted.\nStandby for annihilation.")
+		await sent.reply("Pinkertons connection established: Agent granted.\nStandby for annihilation.")
 	else:
 		await td.send_message(ctx, text = result, reply = True)
 
@@ -469,6 +469,27 @@ async def create_table(interaction: discord.Interaction):
 @bot.tree.command(name = "table", description = "Manage your own tables! (send it in empty)")
 async def table_slash(interaction: discord.Interaction):
 	await table_command(interaction)
+
+
+@bot.command(name = 'copy_db')
+async def copy_db(interaction: discord.Interaction):
+	if cm.Person(interaction).permission_level < 3:
+		await td.send_message(interaction, 'Admin only command.')
+		return
+
+	with DatabaseConnection('old_data.db') as connection:
+		cursor = connection.cursor()
+		cursor.execute("SELECT * FROM statistics")
+		rolls = cursor.fetchall()
+	
+	with DatabaseConnection('data.db') as connection:
+		cursor = connection.cursor()
+		for roll in rolls:
+			roll = roll[1:6] + roll[7:]  # drop index 0 and 6
+			cursor.execute(
+				'INSERT INTO statistics VALUES (?,?,?,?,?,?)',
+				roll
+			)
 
 
 pass
