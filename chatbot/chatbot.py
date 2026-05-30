@@ -2,7 +2,7 @@ from utils.bot_setup import bot
 from databases.database_handler import DatabaseConnection
 import databases.constants as c
 import classes.meta as cm
-import markov as markov
+import chatbot.markov as markov
 import utils.tools_discord as td
 import utils.tools as t
 import random

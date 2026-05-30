@@ -29,10 +29,10 @@ async def markov_saver():
 # noinspection SpellCheckingInspection
 def markovifier(guild: int):
 	text = files_dict[guild]
-	return _markov_from_text(text, 100)
+	return _markov_from_text(text, 15)
 
 
-def _markov_from_text(text: str, max_words = 100) -> str:
+def _markov_from_text(text: str, max_words = 15) -> str:
 	chain = _build_chain(text)
 	return _generate_message(chain, max_words)
 	
