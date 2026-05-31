@@ -95,21 +95,22 @@ def fool_finder(content: str):
 	if len(fools) > 0:
 		for fool in reversed(fools):
 			try:
-				content = content[:fool[3]] + content[fool[3]] + '**' + content[fool[3] + 1:]
+				content = content[:fool[3]] + content[fool[3]] + '``' + content[fool[3] + 1:]
 			except IndexError:
-				content = content[:fool[3]] + content[fool[3]] + '**'
+				content = content[:fool[3]] + content[fool[3]] + '``'
 			
 			if fool[2] + 1 != fool[3]:
-				content = content[:fool[2]] + content[fool[2]] + '**' + content[fool[2] + 1:fool[3]] + '**' + content[fool[3]:]
+				content = content[:fool[2]] + content[fool[2]] + '``' + content[fool[2] + 1:fool[3]] + '``' + content[fool[3]:]
 			
 			if fool[1] + 1 != fool[2]:
-				content = content[:fool[1]] + content[fool[1]] + '**' + content[fool[1] + 1:fool[2]] + '**' + content[fool[2]:]
+				content = content[:fool[1]] + content[fool[1]] + '``' + content[fool[1] + 1:fool[2]] + '``' + content[fool[2]:]
 			
 			if fool[0] + 1 != fool[1]:
-				content = content[:fool[0]] + '**' + content[fool[0]] + '**' + content[fool[0] + 1:fool[1]] + '**' + content[fool[1]:]
+				content = content[:fool[0]] + '``' + content[fool[0]] + '``' + content[fool[0] + 1:fool[1]] + '``' + content[fool[1]:]
 			else:
-				content = content[:fool[0]] + '**' + content[fool[0]] + content[fool[1]:]
-	
+				content = content[:fool[0]] + '``' + content[fool[0]] + content[fool[1]:]
+
+		content = content.replace('````', '')
 		return f'Fool found!\n> {content}\n\n-# Message foolishness level: {len(fools)}.'
 	return None
 
