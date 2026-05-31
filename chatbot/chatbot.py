@@ -69,7 +69,7 @@ async def stealthifier(content: str, message: discord.Message, text_to_send: str
 	await td.send_message(message, text_to_send)
 
 
-def fool_finder(content: str) -> str:
+def fool_finder(content: str):
 	fools = []
 	local_fool = []
 
@@ -91,11 +91,13 @@ def fool_finder(content: str) -> str:
 					local_fool.append(i)
 					fools.append(local_fool)
 					local_fool = []
-
-	for fool in reversed(fools):
-		content = content[:fool[0]] + '**' + content[fool[0]] + '**' + content[fool[0] + 1:fool[1]] + '**' + content[fool[1]] + '**' + content[fool[1] + 1:fool[2]] + '**' + content[fool[2]] + '**' + content[fool[2] + 1:fool[3]] + '**' + content[fool[3]] + '**' + content[fool[3] + 1:]
-
-	return f'Fool found!\n> {content}\n\n-# Message foolishness level: {len(fools)}.'
+	
+	if len(fools) > 0:
+		for fool in reversed(fools):
+			content = content[:fool[0]] + '**' + content[fool[0]] + '**' + content[fool[0] + 1:fool[1]] + '**' + content[fool[1]] + '**' + content[fool[1] + 1:fool[2]] + '**' + content[fool[2]] + '**' + content[fool[2] + 1:fool[3]] + '**' + content[fool[3]] + '**' + content[fool[3] + 1:]
+	
+		return f'Fool found!\n> {content}\n\n-# Message foolishness level: {len(fools)}.'
+	return None
 
 
 async def response_director(message: discord.Message):
@@ -154,7 +156,9 @@ async def response_director(message: discord.Message):
 	if 'no u' in content or 'no you' in content and random.randint(1, 5) == 1:
 		await stealthifier(content, message, text_rando('no u'))
 
-	await stealthifier(content, message, fool_finder(content))
+	temp = fool_finder(content)
+	if temp is not None:
+		await stealthifier(content, message, temp)
 
 	if random.randint(1, 250) == 169:
 		await message.add_reaction(t.choice(c.DG_FAVOURITE_EMOJIS))
