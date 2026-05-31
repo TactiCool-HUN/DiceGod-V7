@@ -523,6 +523,8 @@ async def permission_setter(interaction: discord.Interaction, action: str, permi
 		await td.send_message(interaction, 'Please specify either a person or role.')
 		return
 	
+	await interaction.response.defer()
+	
 	if person:
 		people = [person]
 	else:
@@ -532,6 +534,8 @@ async def permission_setter(interaction: discord.Interaction, action: str, permi
 		cursor = connection.cursor()
 		for target in people:
 			target = cm.Person(target, is_banned_allowed = True)
+			if target.permission_level == 4:
+				continue
 			if action == 'upgrade':
 				cursor.execute('SELECT permission_level FROM people WHERE id = ?;', (target.db_id,))
 				target_permission_level = cursor.fetchone()[0]
