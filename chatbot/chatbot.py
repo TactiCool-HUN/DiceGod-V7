@@ -69,6 +69,35 @@ async def stealthifier(content: str, message: discord.Message, text_to_send: str
 	await td.send_message(message, text_to_send)
 
 
+def fool_finder(content: str) -> str:
+	fools = []
+	local_fool = []
+
+	for i, char in enumerate(content):
+		match len(local_fool):
+			case 0:
+				if char == 'f':
+					local_fool.append(i)
+			case 1:
+				if char == 'f':
+					local_fool[0] = i
+				if char == 'o':
+					local_fool.append(i)
+			case 2:
+				if char == 'o':
+					local_fool.append(i)
+			case 3:
+				if char == 'l':
+					local_fool.append(i)
+					fools.append(local_fool)
+					local_fool = []
+
+	for fool in reversed(fools):
+		content = content[:fool[0]] + '**' + content[fool[0]] + '**' + content[fool[0] + 1:fool[1]] + '**' + content[fool[1]] + '**' + content[fool[1] + 1:fool[2]] + '**' + content[fool[2]] + '**' + content[fool[2] + 1:fool[3]] + '**' + content[fool[3]] + '**' + content[fool[3] + 1:]
+
+	return f'Fool found!\n> {content}\n\n-# Message foolishness level: {len(fools)}.'
+
+
 async def response_director(message: discord.Message):
 	person = cm.Person(message.author)
 	if person.settings.chat_ignore:
@@ -124,6 +153,8 @@ async def response_director(message: discord.Message):
 		await stealthifier(content, message, text_rando('what?', ending_rando = False))
 	if 'no u' in content or 'no you' in content and random.randint(1, 5) == 1:
 		await stealthifier(content, message, text_rando('no u'))
+
+	await stealthifier(content, message, fool_finder(content))
 
 	if random.randint(1, 250) == 169:
 		await message.add_reaction(t.choice(c.DG_FAVOURITE_EMOJIS))
