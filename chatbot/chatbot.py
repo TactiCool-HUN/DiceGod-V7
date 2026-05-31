@@ -93,6 +93,9 @@ def fool_finder(content: str):
 					local_fool = []
 	
 	if len(fools) > 0:
+		if random.randint(0, 10) >= len(fools) * 3 - 2:
+			return None
+		
 		for fool in reversed(fools):
 			try:
 				content = content[:fool[3]] + content[fool[3]] + '``' + content[fool[3] + 1:]
@@ -141,12 +144,12 @@ async def response_director(message: discord.Message):
 		title_spoken = text_rando('{random_title(True)} has spoken', case_rando = False) + '"'
 		name_spoken = text_rando('{display_name} has spoken', case_rando = False) + '"'
 		responses = {
-			text_rando('yes'): int(person.permission_level),
-			text_rando('no'): 4 - int(person.permission_level),
-			text_rando('maybe'): 1,
-			'f"' + title_spoken: 0.4,
-			'f"' + name_spoken: 0.05,
-			'f"{markov.markovifier(message.guild.id)}"': 2,
+			text_rando('yes'): 1 + int(person.permission_level),
+			text_rando('no'): 5 - int(person.permission_level),
+			text_rando('maybe'): 2,
+			'f"' + title_spoken: 0.8,
+			'f"' + name_spoken: 0.1,
+			'f"{markov.markovifier(message.guild.id)}"': 3,
 		}
 		for line in person.get_responses():
 			responses[line[0]] = 1

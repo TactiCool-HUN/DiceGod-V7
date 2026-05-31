@@ -493,4 +493,33 @@ async def copy_db(interaction: discord.Interaction):
 				)
 
 
+@bot.tree.command(name = 'permission_setter', description = 'Admin only: set user permission level.')
+@discord.app_commands.describe(person = '@ the person you want to get statistics about.')
+@discord.app_commands.choices(permission_level = [
+	discord.app_commands.Choice(name = 'Banned', value = -1),
+	discord.app_commands.Choice(name = 'Guest', value = 0),
+	discord.app_commands.Choice(name = 'Registered', value = 1),
+	discord.app_commands.Choice(name = 'Trusted', value = 2),
+	discord.app_commands.Choice(name = 'Admin', value = 3),
+])
+async def permission_setter(interaction: discord.Interaction, permission_level: int, person: discord.Member = None):
+	if cm.Person(interaction).permission_level < 4 and permission_level == 3:
+		await td.send_message(interaction, 'Only Creator can set Admins.')
+		return
+	if cm.Person(interaction).permission_level < 3:
+		await td.send_message(interaction, 'Admin only command.')
+		return
+	
+	if cm.Person(person).permission_level > 2 and cm.Person(interaction).permission_level != 4:
+		await td.send_message(interaction, 'Can\'t target Admins and above.')
+	
+	with DatabaseConnection('data.db') as connection:
+		cursor = connection.cursor()
+		cursor.execute(
+			'UPDATE people SET permission level = ? WHERE id = ?;',
+			(permission_level, cm.Person(person, is_banned_allowed = True))
+		)
+	
+
+
 pass
