@@ -111,6 +111,7 @@ def fool_finder(content: str):
 				content = content[:fool[0]] + '``' + content[fool[0]] + content[fool[1]:]
 
 		content = content.replace('````', '')
+		content = content.replace('\n', '\n> ')
 		return f'Fool found!\n> {content}\n\n-# Message foolishness level: {len(fools)}.'
 	return None
 
