@@ -15,7 +15,7 @@ max_order = 3
 
 async def markov_learner(text: str, guild: int):
 	text = text.replace("<@953258800759070720> ", "") # removing self-mentions
-	files_dict[guild] = f"{files_dict.get(guild, '')}\n{text}"
+	files_dict[guild] = f"{files_dict.get(guild, '')}\n{text.replace('ő', 'ö')}"
 
 
 async def markov_saver():
