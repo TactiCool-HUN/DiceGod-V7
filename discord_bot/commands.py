@@ -494,7 +494,11 @@ async def copy_db(interaction: discord.Interaction):
 
 
 @bot.tree.command(name = 'permission_setter', description = 'Admin only: set user permission level.')
-@discord.app_commands.describe(person = '@ the person you want to get statistics about.')
+@discord.app_commands.choices(action = [
+	discord.app_commands.Choice(name = 'Set', value = 'set'),
+	discord.app_commands.Choice(name = 'Upgrade', value = 'upgrade'),
+	discord.app_commands.Choice(name = 'Downgrade', value = 'downgrade'),
+])
 @discord.app_commands.choices(permission_level = [
 	discord.app_commands.Choice(name = 'Banned', value = -1),
 	discord.app_commands.Choice(name = 'Guest', value = 0),
@@ -502,24 +506,54 @@ async def copy_db(interaction: discord.Interaction):
 	discord.app_commands.Choice(name = 'Trusted', value = 2),
 	discord.app_commands.Choice(name = 'Admin', value = 3),
 ])
-async def permission_setter(interaction: discord.Interaction, permission_level: int, person: discord.Member = None):
+@discord.app_commands.describe(person = '@ the person you want to apply the permission level to.')
+@discord.app_commands.describe(role = '@ the role you want to apply the permission level to.')
+@discord.app_commands.describe(notify = 'Should people be notified? (default: no)')
+async def permission_setter(interaction: discord.Interaction, action: str, permission_level: int, person: discord.Member = None, role: discord.Role = None, notify: bool = False):
 	if cm.Person(interaction).permission_level < 4 and permission_level == 3:
 		await td.send_message(interaction, 'Only Creator can set Admins.')
 		return
 	if cm.Person(interaction).permission_level < 3:
 		await td.send_message(interaction, 'Admin only command.')
 		return
+	if not person and not role:
+		await td.send_message(interaction, 'Please specify a person or role.')
+		return
+	if person and role:
+		await td.send_message(interaction, 'Please specify either a person or role.')
+		return
 	
-	if cm.Person(person).permission_level > 2 and cm.Person(interaction).permission_level != 4:
-		await td.send_message(interaction, 'Can\'t target Admins and above.')
-	
+	if person:
+		people = [person]
+	else:
+		people = role.members
+
 	with DatabaseConnection('data.db') as connection:
 		cursor = connection.cursor()
-		cursor.execute(
-			'UPDATE people SET permission level = ? WHERE id = ?;',
-			(permission_level, cm.Person(person, is_banned_allowed = True))
-		)
-	
+		for target in people:
+			target = cm.Person(target, is_banned_allowed = True)
+			if action == 'upgrade':
+				cursor.execute('SELECT permission_level FROM people WHERE id = ?;', (target.db_id,))
+				target_permission_level = cursor.fetchone()[0]
+				if target_permission_level >= permission_level:
+					continue
+			
+			if action == 'downgrade':
+				cursor.execute('SELECT permission_level FROM people WHERE id = ?;', (target.db_id,))
+				target_permission_level = cursor.fetchone()[0]
+				if target_permission_level <= permission_level:
+					continue
+			
+			if target.permission_level > 2 and cm.Person(interaction).permission_level != 4:
+				await td.send_message(interaction, 'Can\'t target Admins and above.')
+				continue
+			
+			cursor.execute(
+				'UPDATE people SET permission_level = ? WHERE id = ?;',
+				(permission_level, target.db_id)
+			)
+			if notify:
+				await td.send_message(target, f'Your standing with DiceGod has changed to ``{permission_level}``.')
 
 
 pass
