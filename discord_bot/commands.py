@@ -528,10 +528,10 @@ async def permission_setter(interaction: discord.Interaction, action: str, permi
 	else:
 		people = role.members
 
-	with DatabaseConnection('data.db') as connection:
-		cursor = connection.cursor()
-		for target in people:
-			target = cm.Person(target, is_banned_allowed = True)
+	for target in people:
+		target = cm.Person(target, is_banned_allowed = True)
+		with DatabaseConnection('data.db') as connection:
+			cursor = connection.cursor()
 			if target.permission_level == 4:
 				continue
 			if action == 'upgrade':
