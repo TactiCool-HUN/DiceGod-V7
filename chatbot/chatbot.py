@@ -174,6 +174,10 @@ async def response_director(message: discord.Message):
 		await stealthifier(content, message, text_rando('what?', ending_rando = False))
 	if 'no u' in content or 'no you' in content and random.randint(1, 5) == 1:
 		await stealthifier(content, message, text_rando('no u'))
+	if 'goodbot' in content.lower().replace(' ', ''):
+		await stealthifier(content, message, '<:zorablush:1021403403768844308>')
+	if 'clanker' in content.lower():
+		await stealthifier(content, message, '<:KyrAAAAH:1058349087965065256>')
 
 	temp = fool_finder(content)
 	if temp is not None:

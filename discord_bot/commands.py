@@ -523,8 +523,6 @@ async def permission_setter(interaction: discord.Interaction, action: str, permi
 		await td.send_message(interaction, 'Please specify either a person or role.')
 		return
 	
-	await interaction.response.defer()
-	
 	if person:
 		people = [person]
 	else:
@@ -558,6 +556,8 @@ async def permission_setter(interaction: discord.Interaction, action: str, permi
 			)
 			if notify:
 				await td.send_message(target, f'Your standing with DiceGod has changed to ``{permission_level}``.')
+	
+	await td.send_message(interaction, 'Complete.', ephemeral = True)
 
 
 pass
