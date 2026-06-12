@@ -3,6 +3,7 @@ from modals.table_maker import table_maker_main
 from modals.table_modal import table_command
 from utils.followup import followup
 from utils.bot_setup import bot
+from chatbot.markov import load_from_disk
 import utils.tools as t
 import utils.tools_discord as td
 import classes.meta as cm
@@ -557,6 +558,16 @@ async def permission_setter(interaction: discord.Interaction, action: str, permi
 			if notify:
 				await td.send_message(target, f'Your standing with DiceGod has changed to ``{permission_level}``.')
 	
+	await td.send_message(interaction, 'Complete.', ephemeral = True)
+
+
+@bot.tree.command(name = "reload_markov_from_disk", description = "Admin Only")
+async def reload_markov_from_disk(interaction: discord.Interaction):
+	if cm.Person(interaction).permission_level < 3:
+		await td.send_message(interaction, 'Admin only command.')
+		return
+	
+	await load_from_disk()
 	await td.send_message(interaction, 'Complete.', ephemeral = True)
 
 

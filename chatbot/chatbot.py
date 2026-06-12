@@ -93,7 +93,13 @@ def fool_finder(content: str):
 					local_fool = []
 	
 	if len(fools) > 0:
-		if random.randint(0, 10) >= len(fools) * 3 - 2:
+		if len(fools) == 1 and random.randint(1, 100) < 95:
+			return None
+		elif len(fools) == 2 and random.randint(1, 100) < 80:
+			return None
+		elif len(fools) == 3 and random.randint(1, 100) < 60:
+			return None
+		elif len(fools) > 3 and random.randint(1, 100) < 50:
 			return None
 		
 		for fool in reversed(fools):

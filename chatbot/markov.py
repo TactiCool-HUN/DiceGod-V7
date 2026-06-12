@@ -13,14 +13,23 @@ files_dict = {
 max_order = 3
 
 
+async def load_from_disk():
+	for f in folder.iterdir():
+		if f.is_file() and f.suffix == ".txt":
+			files_dict[int(f.stem)] = f.read_text(encoding="cp1252")
+	print("reload: " + str(len(files_dict[562373378967732226])))
+
+
 async def markov_learner(text: str, guild: int):
 	text = text.replace("<@953258800759070720> ", "") # removing self-mentions
 	files_dict[guild] = f"{files_dict.get(guild, '')}\n{text.replace('ő', 'ö')}"
+	print("learner: " + str(len(files_dict[562373378967732226])))
 
 
 async def markov_saver():
 	while True:
-		await asyncio.sleep(300)
+		await asyncio.sleep(50)
+		print("saver: " + str(len(files_dict[562373378967732226])))
 		for guild in files_dict:
 			with open(f"databases/markov_studies/{guild}.txt", "w", encoding="cp1252") as f:
 				f.write(files_dict[guild])
