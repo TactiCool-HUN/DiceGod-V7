@@ -867,17 +867,21 @@ def fix_text(text):
 
 	return text
 
-input_path = Path('../../databases/markov_studies/562373378967732226.txt')
+input_path = Path('databases/markov_studies/562373378967732226.txt')
 output_path = Path('databases/562373378967732226_fixed.txt')
 
-text = input_path.read_text(encoding='utf-8')
-fixed = fix_text(text)
+def run_fix():
+	text = input_path.read_text(encoding='utf-8')
+	fixed = fix_text(text)
+	
+	remaining = fixed.count('ï¿½')
+	original = text.count('ï¿½')
+	fixed_count = original - remaining
+	
+	output_path.write_text(fixed, encoding='utf-8')
+	print(f"Original corrupted sequences : {original}")
+	print(f"Fixed                        : {fixed_count} ({fixed_count/original*100:.1f}%)")
+	print(f"Left as-is (ambiguous)       : {remaining} ({remaining/original*100:.1f}%)")
 
-remaining = fixed.count('ï¿½')
-original = text.count('ï¿½')
-fixed_count = original - remaining
 
-output_path.write_text(fixed, encoding='utf-8')
-print(f"Original corrupted sequences : {original}")
-print(f"Fixed                        : {fixed_count} ({fixed_count/original*100:.1f}%)")
-print(f"Left as-is (ambiguous)       : {remaining} ({remaining/original*100:.1f}%)")
+pass
