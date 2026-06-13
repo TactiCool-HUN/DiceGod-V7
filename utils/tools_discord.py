@@ -24,6 +24,7 @@ async def send_message(
 	:key embed: embed
 	:key followups: list[FollowupButton]
 	:key poll: discord.Poll
+	:key mentions_allowed: bool
 	:return: discord.Message
 	"""
 	ephemeral: bool = kwargs.get('ephemeral', False)
@@ -36,6 +37,8 @@ async def send_message(
 		view: discord.ui.View = uf.get_followup_view(followups)
 	else:
 		view: discord.ui.View = discord.ui.View()
+	if kwargs.get('mentions_allowed', False):
+		text = text.replace('@', '')
 
 	sent: discord.Message | None = None
 

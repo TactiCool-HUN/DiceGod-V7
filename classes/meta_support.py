@@ -73,16 +73,28 @@ class PermissionLevel:
 		return float(self.permission_level)
 
 	def __lt__(self, other):
-		return int(self) < int(other)
+		try:
+			return int(self) < int(other)
+		except ValueError:
+			return int(self) < int(self._str_to_int[other])
 
 	def __le__(self, other):
-		return int(self) <= int(other)
+		try:
+			return int(self) <= int(other)
+		except ValueError:
+			return int(self) <= int(self._str_to_int[other])
 
 	def __gt__(self, other):
-		return int(self) > int(other)
+		try:
+			return int(self) > int(other)
+		except ValueError:
+			return int(self) > int(self._str_to_int[other])
 
 	def __ge__(self, other):
-		return int(self) >= int(other)
+		try:
+			return int(self) > int(other)
+		except ValueError:
+			return int(self) >= int(self._str_to_int[other])
 
 	def __eq__(self, other):
 		return (int(self) == int(other)) or (str(self) == str(other))

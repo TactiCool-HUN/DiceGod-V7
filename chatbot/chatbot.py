@@ -62,11 +62,11 @@ def text_rando(text: str, **kwargs) -> str:
 	return text
 
 
-async def stealthifier(content: str, message: discord.Message, text_to_send: str) -> None:
+def stealthifier(content: str, text_to_send: str) -> str:
 	if content[0] == '(' and content[-1] == ')':
 		text_to_send = '(' + text_to_send + ')'
 
-	await td.send_message(message, text_to_send)
+	return text_to_send
 
 
 def fool_finder(content: str):
@@ -170,24 +170,24 @@ async def response_director(message: discord.Message):
 				'message.guild.id': message.guild.id,
 				'message': message,
 			})
-		await stealthifier(content, message, response)
+		await td.send_message(message, stealthifier(content, response))
 
 	if '69' in content:
-		await stealthifier(content, message, text_rando('nice'))
+		await td.send_message(message, stealthifier(content, text_rando('nice')))
 	if 'meme' in content:
-		await stealthifier(content, message, text_rando('the DNA of the soul'))
+		await td.send_message(message, stealthifier(content, text_rando('the DNA of the soul')))
 	if 'say what?' in content:
-		await stealthifier(content, message, text_rando('what?', ending_rando = False))
-	if 'no u' in content or 'no you' in content and random.randint(1, 5) == 1:
-		await stealthifier(content, message, text_rando('no u'))
+		await td.send_message(message, stealthifier(content, text_rando('what?', ending_rando = False)))
+	if 'no u' in content or 'no you' in content and random.randint(1, 5) != 1:
+		await td.send_message(message, stealthifier(content, text_rando('no u')))
 	if 'goodbot' in content.lower().replace(' ', ''):
-		await stealthifier(content, message, '<:zorablush:1021403403768844308>')
+		await td.send_message(message, stealthifier(content, '<:zorablush:1021403403768844308>'))
 	if 'clanker' in content.lower():
-		await stealthifier(content, message, '<:KyrAAAAH:1058349087965065256>')
+		await td.send_message(message, stealthifier(content, '<:KyrAAAAH:1058349087965065256>'))
 
 	temp = fool_finder(content)
 	if temp is not None:
-		await stealthifier(content, message, temp)
+		await td.send_message(message, stealthifier(content, temp))
 
 	if random.randint(1, 250) == 169:
 		await message.add_reaction(t.choice(c.DG_FAVOURITE_EMOJIS))

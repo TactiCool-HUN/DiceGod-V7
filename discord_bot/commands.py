@@ -3,7 +3,7 @@ from modals.table_maker import table_maker_main
 from modals.table_modal import table_command
 from utils.followup import followup
 from utils.bot_setup import bot
-from chatbot.markov import load_from_disk
+import chatbot.markov as markov
 import utils.tools as t
 import utils.tools_discord as td
 import classes.meta as cm
@@ -350,7 +350,7 @@ async def kill_command(ctx: discord.ext.commands.Context, *, other = None):
 		}
 		result = t.choice(response_list)
 	if result[0] == "-":
-		sent = await td.send_message(ctx, text = result, reply = True)
+		sent = await td.send_message(ctx, text = result, reply = True, mentions_allowed = True)
 		contacting = await sent.reply("Contacting Pinkertons, please do not leave your current area. (○)")
 		for i in range(10):
 			if i % 2 == 0:
@@ -364,7 +364,7 @@ async def kill_command(ctx: discord.ext.commands.Context, *, other = None):
 		await asyncio.sleep(6)
 		await sent.reply("Pinkertons connection established: Agent granted.\nStandby for annihilation.")
 	else:
-		await td.send_message(ctx, text = result, reply = True)
+		await td.send_message(ctx, text = result, reply = True, mentions_allowed = True)
 
 
 @bot.tree.command(name = 'statistics', description = 'Display your or others roll statistics.')
@@ -555,8 +555,9 @@ async def permission_setter(interaction: discord.Interaction, action: str, permi
 				'UPDATE people SET permission_level = ? WHERE id = ?;',
 				(permission_level, target.db_id)
 			)
+			target = cm.Person(target.db_id, is_banned_allowed = True)
 			if notify:
-				await td.send_message(target, f'Your standing with DiceGod has changed to ``{permission_level}``.')
+				await td.send_message(target, f'Your standing with DiceGod has changed to ``{str(target.permission_level)}``.')
 	
 	await td.send_message(interaction, 'Complete.', ephemeral = True)
 
@@ -567,7 +568,7 @@ async def reload_markov_from_disk(interaction: discord.Interaction):
 		await td.send_message(interaction, 'Admin only command.')
 		return
 	
-	await load_from_disk()
+	await markov.load_from_disk()
 	await td.send_message(interaction, 'Complete.', ephemeral = True)
 
 
