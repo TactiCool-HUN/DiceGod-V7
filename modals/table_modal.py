@@ -20,7 +20,7 @@ async def table_command(interaction: discord.Interaction):
 
 	tables = []
 	for line in raw:
-		tables.append(discord.SelectOption(label = line[0]))
+		tables.append(discord.SelectOption(label = line[1]))
 
 	table = TableCommand(interaction)
 
