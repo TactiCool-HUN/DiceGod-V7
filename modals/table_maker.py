@@ -136,7 +136,7 @@ class TableMakerModalTwo(discord.ui.Modal, title = "Create Table"):
 	)
 
 	async def on_submit(self, interaction: discord.Interaction) -> None:
-		await interaction.response.defer()
+		await td.send_message(interaction, f"Working...", ephemeral = True)
 
 		self.main_role_name = self.main_role_name.value
 		self.guest_role_name = self.guest_role_name.value
@@ -157,12 +157,6 @@ class TableMakerModalTwo(discord.ui.Modal, title = "Create Table"):
 			mentionable = True,
 			reason = f"Requested by {interaction.user.name}."
 		)
-
-		for i, role in enumerate(guild.roles):
-			if role.id == 1170868005824122921:  # the <misc> role thing
-				await main_role.edit(position = role.position)
-				await guest_role.edit(position = role.position)
-				break
 
 		await interaction.user.add_roles(main_role)
 
@@ -245,7 +239,7 @@ class TableMakerModalTwo(discord.ui.Modal, title = "Create Table"):
 		await td.send_message(interaction, f"Table with name ``{self.table_name}`` created.", ephemeral = True)
 		await td.send_message(interaction.user, f"You are now the GM of the following table: ``{self.table_name}``.\nYou can add a player with the /table command.\nAll changes will notify the person in question!")
 		if interaction.user.id != 282869456664002581:
-			await td.send_message(cm.Person(282869456664002581), f"A table has been created by {interaction.user.name}.")
+			await td.send_message(cm.Person(282869456664002581), f"A table has been created by {interaction.user.name}. MOVE THE FUCKING ROLES\n(:c)")
 
 
 pass
