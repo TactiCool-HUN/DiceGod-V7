@@ -36,7 +36,12 @@ def fix(counter: bool):
 					if 'ï¿½' in word:
 						if not counter:
 							print('-------------------')
-						if word in my_dict.keys() or word[0].lower() + word[1:] in my_dict.keys():
+						if j == 0 and word == 'ï¿½':
+							if len(words) > 1 and words[j + 1][0].isupper():
+								word = '-'
+							else:
+								word = '[?]'
+						elif word in my_dict.keys() or word[0].lower() + word[1:] in my_dict.keys():
 							lookup_key = word if word in my_dict else word[0].lower() + word[1:]
 							if isinstance(my_dict[lookup_key], str):
 								if not counter:
@@ -76,6 +81,7 @@ def fix(counter: bool):
 								word = response
 								write(my_dict)
 						words[j] = word
+						line = ''.join(words)
 				line = ''.join(words)
 				lines[i] = line
 		text = '\n'.join(lines)
@@ -91,7 +97,7 @@ def fix(counter: bool):
 			line = ''.join(words)
 			lines[i] = line
 			text = '\n'.join(lines)
-			print(text.count('ï¿½'))
+			fix(True)
 			output_path.write_text(text, encoding='utf-8')
 			print("Saved.")
 			return 'out'
