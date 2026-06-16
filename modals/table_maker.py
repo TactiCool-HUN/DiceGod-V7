@@ -244,7 +244,8 @@ class TableMakerModalTwo(discord.ui.Modal, title = "Create Table"):
 			)
 		await td.send_message(interaction, f"Table with name ``{self.table_name}`` created.", ephemeral = True)
 		await td.send_message(interaction.user, f"You are now the GM of the following table: ``{self.table_name}``.\nYou can add a player with the /table command.\nAll changes will notify the person in question!")
-		await td.send_message(282869456664002581, f"A table has been created by {interaction.user.name}.")
-		
+		if interaction.user.id != 282869456664002581:
+			await td.send_message(cm.Person(282869456664002581), f"A table has been created by {interaction.user.name}.")
+
 
 pass

@@ -78,10 +78,11 @@ class TableCommand:
 
 class Table:
 	def __init__(self, table_raw):
-		self.name: str = table_raw[0]
-		self.gm: discord.User = bot.get_user(table_raw[1])
-		self.player_role: discord.Role = bot.get_guild(562373378967732226).get_role(table_raw[2])
-		self.guest_role: discord.Role = bot.get_guild(562373378967732226).get_role(table_raw[3])
+		self.db_id: int = table_raw[0]
+		self.name: str = table_raw[1]
+		self.gm: discord.User = bot.get_user(table_raw[2])
+		self.player_role: discord.Role = bot.get_guild(562373378967732226).get_role(table_raw[3])
+		self.guest_role: discord.Role = bot.get_guild(562373378967732226).get_role(table_raw[4])
 
 
 # - - - - - - - - - - Selects - - - - - - - - - -
