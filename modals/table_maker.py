@@ -160,8 +160,8 @@ class TableMakerModalTwo(discord.ui.Modal, title = "Create Table"):
 
 		for i, role in enumerate(guild.roles):
 			if role.id == 1170868005824122921:  # the <misc> role thing
-				await main_role.edit(position = role.position + 1)
-				await guest_role.edit(position = role.position + 1)
+				await main_role.edit(position = role.position)
+				await guest_role.edit(position = role.position)
 				break
 
 		await interaction.user.add_roles(main_role)
