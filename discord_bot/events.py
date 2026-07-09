@@ -5,7 +5,7 @@ import chatbot.markov as markov
 import asyncio
 import discord
 import random
-import utils.global_settings as settings
+import databases.constants as const
 import utils.tools as t
 import utils.tools_discord as td
 
@@ -19,6 +19,8 @@ async def on_message(message: discord.Message):
 
 	asyncio.create_task(chatbot.response_director(message))
 	asyncio.create_task(bot.process_commands(message))
+	if message.channel.id == 911770517533507604:  # hall of fame veterancy
+		await td.veterancy_calc(message.channel)
 
 
 @bot.event
@@ -29,7 +31,7 @@ async def on_ready():
 
 	t.ic(f"{bot.user.name.upper()} is online!")
 
-	if settings.SYNC:
+	if const.SYNC:
 		try:
 			synced = await bot.tree.sync()
 			t.ic(f"Synced {len(synced)} command(s)")
@@ -37,8 +39,8 @@ async def on_ready():
 			t.ic(e)
 	else:
 		try:
-			bot.tree.copy_global_to(guild = discord.Object(id = settings.TEST_GUILD))
-			synced = await bot.tree.sync(guild = discord.Object(id = settings.TEST_GUILD))
+			bot.tree.copy_global_to(guild = discord.Object(id = const.TEST_GUILD))
+			synced = await bot.tree.sync(guild = discord.Object(id = const.TEST_GUILD))
 			t.ic(f"Synced {len(synced)} command(s) to the TEST guild")
 		except Exception as e:
 			t.ic(e)

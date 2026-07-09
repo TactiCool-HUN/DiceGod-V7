@@ -174,6 +174,10 @@ async def response_director(message: discord.Message):
 
 	if '69' in content:
 		await td.send_message(message, stealthifier(content, text_rando('nice')))
+	if '*huggies*' in content:
+		await td.send_message(message, stealthifier(content, '*huggies*'))
+	elif 'huggies' in content:
+		await td.send_message(message, stealthifier(content, 'huggies'))
 	if 'meme' in content:
 		await td.send_message(message, stealthifier(content, text_rando('the DNA of the soul')))
 	if 'say what?' in content:

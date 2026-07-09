@@ -7,7 +7,7 @@ folder = Path("databases/markov_studies")
 files_dict = {
 	int(f.stem): f.read_text(encoding="utf-8")
 	for f in folder.iterdir()
-	if f.is_file() and f.suffix == ".txt"
+	if f.is_file() and f.suffix == ".txt" and "copy" not in f.stem.lower()
 }
 
 max_order = 3

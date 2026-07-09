@@ -6,8 +6,60 @@ import utils.followup as uf
 import databases.constants as c
 from databases.database_handler import DatabaseConnection
 import datetime
+import discord
+import re
 
 from utils.followup import FollowupButton
+
+
+async def veterancy_calc(hall_of_fame: discord.TextChannel, user: discord.Member = None):
+	messages = [message async for message in hall_of_fame.history(limit=None)]
+	user_scores = dict()
+	user_time = 0
+	user_vet_rank = None
+	
+	for msg in messages:
+		point_value = 1
+		adventure_duration = 0
+		match = re.search(r"Duration \(irl\): (\d+)", msg.content)
+		if match:
+			adventure_duration = int(match.group(1))
+			if adventure_duration > 365:
+				point_value = 2
+		for mention in msg.mentions:
+			user_scores[mention] = user_scores.get(mention, 0) + point_value
+			if mention.id == user.id:
+				user_time += adventure_duration
+	
+	for member in user_scores.keys():
+		member: discord.Member
+		if not isinstance(member, discord.Member):
+			continue
+		try:
+			score = user_scores[member]
+			target_role = member.guild.get_role(c.VETERANCY_ROLE_BY_POINT.get(score, c.VETERANCY_ROLE_BY_POINT[max(c.VETERANCY_ROLE_BY_POINT.keys())]))
+			if user.id == member.id:
+				user_vet_rank = target_role
+			target_role_found = False
+			for role in member.roles:
+				role: discord.Role
+				if role.id == target_role.id:
+					target_role_found = True
+					continue
+				if role.id in c.VETERANCY_ROLES:
+					await member.remove_roles(role, reason = "Veterancy adjustment.")
+		
+			if not target_role_found:
+				await member.add_roles(target_role, reason = "Veterancy adjustment.")
+				await send_message(member, f"You reached a new veterancy role in the RPG Corner: {target_role.name}")
+		except Exception as e:
+			await send_message(cm.Person(282869456664002581), f"Veterancy calc failed\n\n{e}")
+	
+	user_time = user_time / 7 * 0.9  # divide so it's weeks, about 90% of weeks have sessions
+	user_time = int(user_time * 3)  # each session is about 3 hours long
+	disappointment = f"{user.display_name} has spent at least {user_time} hours sitting on sessions.\nThey are at veterancy rank {user_vet_rank.name} with {user_scores[user]} points."
+	
+	return disappointment
 
 
 async def send_message(

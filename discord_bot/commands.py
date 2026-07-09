@@ -111,7 +111,7 @@ async def coin_slash(interaction: discord.Interaction):
 	await td.send_message(interaction, text = t.choice(response_list))
 
 
-@bot.tree.command(name = 'settings', description = 'Set your Things!')
+@bot.tree.command(name = 'const', description = 'Set your Things!')
 @discord.app_commands.describe(color = "Set your color! (use #000000 or 0x000000 hex code)")
 @discord.app_commands.choices(chat_ignore=[
 	discord.app_commands.Choice(name = "on", value = 1),
@@ -570,6 +570,19 @@ async def reload_markov_from_disk(interaction: discord.Interaction):
 	
 	await markov.load_from_disk()
 	await td.send_message(interaction, 'Complete.', ephemeral = True)
+
+
+@bot.tree.command(name = "get_disappointed_in_your_life", description = "Manually recalculate veterancy roles.")
+@discord.app_commands.describe(person = '@ the person you want to disappoint.')
+async def veterancy_recalc(interaction: discord.Interaction, person: discord.Member = None):
+	disappointment = await td.veterancy_calc(bot.get_channel(911770517533507604), person)
+	await td.send_message(interaction, disappointment, ephemeral = False)
+
+
+@bot.command(name = "veterancy", description = "Manually recalculate veterancy roles.")
+async def veterancy_recalc_old(ctx: discord.ext.commands.Context):
+	disappointment = await td.veterancy_calc(bot.get_channel(911770517533507604), ctx.author)
+	await td.send_message(ctx, disappointment)
 
 
 pass
