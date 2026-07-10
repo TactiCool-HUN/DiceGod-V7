@@ -589,4 +589,14 @@ async def veterancy_recalc_old(ctx: discord.ext.commands.Context):
 	await td.send_message(ctx, disappointment)
 
 
+@bot.command(name = "sync")
+async def sync(ctx: discord.ext.commands.Context):
+	if cm.Person(ctx).permission_level < 4:
+		await td.send_message(ctx, 'Creator only command.')
+		return
+
+	synced = await bot.tree.sync()
+	await td.send_message(ctx, f"Synced {len(synced)} command(s)")
+
+
 pass
