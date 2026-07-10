@@ -581,7 +581,11 @@ async def veterancy_recalc(interaction: discord.Interaction, person: discord.Mem
 
 @bot.command(name = "veterancy", description = "Manually recalculate veterancy roles.")
 async def veterancy_recalc_old(ctx: discord.ext.commands.Context):
-	disappointment = await td.veterancy_calc(bot.get_channel(911770517533507604), ctx.author)
+	if ctx.message.mentions:
+		disappointment = await td.veterancy_calc(bot.get_channel(911770517533507604), ctx.message.mentions[0])
+	else:
+		disappointment = await td.veterancy_calc(bot.get_channel(911770517533507604), ctx.author)
+	
 	await td.send_message(ctx, disappointment)
 
 
