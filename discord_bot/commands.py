@@ -12,6 +12,8 @@ import roller
 import asyncio
 import discord
 import discord.ext
+import random
+from datetime import timedelta
 
 
 @bot.command(name = 'test')
@@ -597,6 +599,90 @@ async def sync(ctx: discord.ext.commands.Context):
 
 	synced = await bot.tree.sync()
 	await td.send_message(ctx, f"Synced {len(synced)} command(s)")
+
+
+@bot.tree.command(name = "quote_game", description = "Guess on who's quote it is.")
+@discord.app_commands.choices(round_length = [
+	discord.app_commands.Choice(name = '30sec (recommended)', value = 30),
+	discord.app_commands.Choice(name = '1 hour (if you just want to leave it open)', value = 60*60*60),
+])
+async def quote_game(interaction: discord.Interaction, round_length: int = 30):
+	round_length = int(round_length)
+	messages = [message async for message in bot.get_channel(1028765263438557325).history(limit=None)]
+	quotes = []
+	mentions = []
+	
+	for message in messages:
+		content = message.content
+		if "```" not in content:
+			continue
+		
+		end = -1
+		while True:
+			try:
+				start = content.index("```", end + 1)
+				end = content.index("```", start + 1)
+				quote = content[start + 3:end]
+				mention = content[content.index("@", end)+1:content.index(">", end)]
+				if mention.isnumeric():
+					quotes.append([quote, mention])
+					mentions.append(mention)
+			except ValueError:
+				break
+		
+	quote_to_use = random.choice(quotes)
+	quote_to_use[0] = quote_to_use[0].strip()
+	while True:
+		versus = random.choice(mentions)
+		if quote_to_use[1] != versus:
+			break
+
+	if round_length == 30:
+		time = "30 seconds"
+	else:
+		time = "1 hour"
+	
+	guild = bot.get_guild(562373378967732226)
+	person1 = guild.get_member(int(quote_to_use[1]))
+	if person1 is None:
+		person1 = bot.get_user(int(quote_to_use[1]))
+	person2 = guild.get_member(int(versus))
+	if person2 is None:
+		person2 = bot.get_user(int(versus))
+
+	people = [
+		[quote_to_use[1], person1.display_name],
+		[versus, person2.display_name],
+	]
+	random.shuffle(people)
+
+	poll = discord.Poll(
+		duration = timedelta(hours = 24),
+		question = f'Quote: "{quote_to_use[0]}"',
+	)
+	poll.add_answer(text = people[0][1])
+	poll.add_answer(text = people[1][1])
+
+	sent: discord.InteractionCallbackResponse = await td.send_message(interaction, f'Who said the following vote?\n-# voting time: {time}', poll = poll)
+	sent: discord.Message = sent.resource
+	await asyncio.sleep(round_length)
+	await sent.end_poll()
+	
+	answers = sent.poll.answers
+	correct = []
+	incorrect = []
+	for answer in answers:
+		if answer.text == people[0][1]:
+			answer_id = people[0][0]
+		else:
+			answer_id = people[1][0]
+		
+		if answer_id == quote_to_use[1]:
+			correct = correct + [voter async for voter in answer.voters()]
+		else:
+			incorrect = incorrect + [voter async for voter in answer.voters()]
+	
+	await td.send_message(sent, f'The quote "{quote_to_use[0]}" originates from: {person1.display_name}\n\nCorrect votes: {", ".join([member.mention for member in correct])}\nIncorrect votes: {", ".join([member.mention for member in incorrect])}')
 
 
 pass

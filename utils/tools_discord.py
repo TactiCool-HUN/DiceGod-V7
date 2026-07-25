@@ -66,7 +66,7 @@ async def send_message(
 		identifier: discord.TextChannel | discord.Message | discord.Interaction | discord.ext.commands.Context | discord.Member | cm.Person,
 		text: str = '',
 		**kwargs
-) -> discord.Message:
+) -> discord.Message | discord.InteractionCallbackResponse:
 	"""
 	:param identifier: TextChannel | Message | Interaction | Context | Member | Person
 	:param text: str
@@ -77,7 +77,7 @@ async def send_message(
 	:key followups: list[FollowupButton]
 	:key poll: discord.Poll
 	:key mentions_allowed: bool
-	:return: discord.Message
+	:return: discord.Message | discord.InteractionCallbackResponse
 	"""
 	ephemeral: bool = kwargs.get('ephemeral', False)
 	reply: bool = kwargs.get('reply', False)
@@ -114,8 +114,8 @@ async def send_message(
 					poll = poll,
 					view = view,
 				)
-		case discord.ext.commands.Context | discord.Message:
-			if isinstance(identifier, discord.Message):
+		case discord.ext.commands.Context | discord.Message | discord.InteractionMessage:
+			if isinstance(identifier, discord.Message) or isinstance(identifier, discord.InteractionMessage):
 				reply = True
 				identifier: discord.Message
 			else:
