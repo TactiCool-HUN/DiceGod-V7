@@ -592,12 +592,16 @@ async def veterancy_recalc_old(ctx: discord.ext.commands.Context):
 
 
 @bot.command(name = "sync")
-async def sync(ctx: discord.ext.commands.Context):
+async def sync(ctx: discord.ext.commands.Context, guild_id: str = ""):
 	if cm.Person(ctx).permission_level < 4:
 		await td.send_message(ctx, 'Creator only command.')
 		return
 
-	synced = await bot.tree.sync()
+	if guild_id:
+		bot.tree.copy_global_to(guild = discord.Object(id = int(guild_id)))
+		synced = await bot.tree.sync(guild = discord.Object(id = int(guild_id)))
+	else:
+		synced = await bot.tree.sync()
 	await td.send_message(ctx, f"Synced {len(synced)} command(s)")
 
 
