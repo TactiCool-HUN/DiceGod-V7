@@ -604,6 +604,8 @@ async def sync(ctx: discord.ext.commands.Context):
 @bot.tree.command(name = "quote_game", description = "Guess on who's quote it is.")
 @discord.app_commands.choices(round_length = [
 	discord.app_commands.Choice(name = '30sec (recommended)', value = 30),
+	discord.app_commands.Choice(name = '1 minute', value = 60),
+	discord.app_commands.Choice(name = '5 minutes', value = 60*5),
 	discord.app_commands.Choice(name = '1 hour (if you just want to leave it open)', value = 60*60*60),
 ])
 async def quote_game(interaction: discord.Interaction, round_length: int = 30):
@@ -639,6 +641,10 @@ async def quote_game(interaction: discord.Interaction, round_length: int = 30):
 
 	if round_length == 30:
 		time = "30 seconds"
+	elif round_length == 60:
+		time = "1 minute"
+	elif round_length == 60*5:
+		time = "5 minutes"
 	else:
 		time = "1 hour"
 	
