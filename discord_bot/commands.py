@@ -672,7 +672,6 @@ async def quote_game(interaction: discord.Interaction, round_length: int = 30):
 	sent: discord.InteractionCallbackResponse = await td.send_message(interaction, f'Who said the following vote?\n-# voting time: {time}', poll = poll)
 	sent: discord.Message = sent.resource
 	await asyncio.sleep(round_length)
-	await sent.end_poll()
 	
 	answers = sent.poll.answers
 	correct = []
@@ -687,8 +686,9 @@ async def quote_game(interaction: discord.Interaction, round_length: int = 30):
 			correct = correct + [voter async for voter in answer.voters()]
 		else:
 			incorrect = incorrect + [voter async for voter in answer.voters()]
-	
-	await td.send_message(sent, f'The quote "{quote_to_use[0]}" originates from: {person1.display_name}\n\nCorrect votes: {", ".join([member.mention for member in correct])}\nIncorrect votes: {", ".join([member.mention for member in incorrect])}')
+
+	await td.send_message(sent, f'**Quote Game Results**\nThe quote was:\n```{quote_to_use[0]}```\nQuote from, and votes:\n:white_check_mark: {person1.display_name}: {", ".join([member.mention for member in correct])}\n:octagonal_sign: {person2.display_name}: {", ".join([member.mention for member in incorrect])}')
+	await sent.delete()
 
 
 pass
