@@ -691,4 +691,57 @@ async def quote_game(interaction: discord.Interaction, round_length: int = 30):
 	await sent.delete()
 
 
+@bot.command(name = "scared_satan")
+async def scared_satan(ctx: discord.ext.commands.Context):
+	if cm.Person(ctx).permission_level < 4:
+		await td.send_message(ctx, 'Only the Creator can summon satan.')
+		return
+
+	identify_santa = {
+		#520697326679883808: ['Anna',   []],
+		#152824369805131776: ['Bence',  [463641084971712514]],
+		886672003396927530: ['Dani',   [1426619260893003937]],
+		282869456664002581: ['Endre',  []],
+		#377469395007438849: ['Márk',   [618475228695232532]],
+		#875753704685436938: ['Nika',   []],
+		#618475228695232532: ['Regő',   [377469395007438849]],
+		#463641084971712514: ['Ági',    [152824369805131776]],
+		#242727379447971840: ['Andris', []],
+		#1426619260893003937:['Csenge', [886672003396927530]],
+		#332925665424834560: ['Eszter', []],
+		951125025942016031: ['TactiTester', []],
+	}
+
+	secret_santa_keys = list(identify_santa.keys())
+
+	while True:
+		partner_match = False
+		random.shuffle(secret_santa_keys)
+
+		for i in range(len(secret_santa_keys) - 1):
+			_, partners = identify_santa[secret_santa_keys[i]]
+			pass
+			for partner in partners:
+				pass
+				if partner == secret_santa_keys[i + 1]:
+					partner_match = True
+					break
+
+		for partner in identify_santa[secret_santa_keys[-1]][1]:
+			pass
+			if partner == secret_santa_keys[0]:
+				partner_match = True
+				break
+
+		if not partner_match: break
+
+	for i in range(len(secret_santa_keys)):
+		try:
+			txt = f"You are gifting to {identify_santa[secret_santa_keys[i + 1]][0]}"
+		except IndexError:
+			txt = f"You are gifting to {identify_santa[secret_santa_keys[0]][0]}"
+
+		await td.send_message(cm.Person(discord_id = secret_santa_keys[i]), txt, silent = False)
+
+
 pass
