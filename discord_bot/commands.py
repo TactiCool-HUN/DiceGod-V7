@@ -13,6 +13,7 @@ import asyncio
 import discord
 import discord.ext
 import random
+import random_game.fireball_sweeper as fireball_sweeper
 from datetime import timedelta
 
 
@@ -742,6 +743,21 @@ async def scared_satan(ctx: discord.ext.commands.Context):
 			txt = f"You are gifting to {identify_santa[secret_santa_keys[0]][0]}"
 
 		await td.send_message(cm.Person(identifier = secret_santa_keys[i]), txt, silent = False)
+
+
+@bot.tree.command(name = "fireball_sweeper", description = "Oh no! The wizards are casting a bunch of fireballs from the coast!")
+@discord.app_commands.choices(size = [
+	discord.app_commands.Choice(name = 'small', value = 8),
+	discord.app_commands.Choice(name = 'medium', value = 16),
+	discord.app_commands.Choice(name = 'large', value = 30),
+])
+@discord.app_commands.choices(difficulty = [
+	discord.app_commands.Choice(name = 'easy', value = 0.1),
+	discord.app_commands.Choice(name = 'medium', value = 0.2),
+	discord.app_commands.Choice(name = 'hard', value = 0.3),
+])
+async def fireball(interaction: discord.Interaction, size: int, difficulty: float):
+	await fireball_sweeper.start(interaction, int(size), float(difficulty))
 
 
 pass

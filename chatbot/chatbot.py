@@ -8,6 +8,8 @@ import utils.tools as t
 import random
 import discord
 import asyncio
+import databases.bot_state as bot_state
+import random_game.fireball_sweeper as fireball_sweeper
 
 
 def in_silent_area(message: discord.Message) -> bool:
@@ -93,11 +95,11 @@ def fool_finder(content: str):
 					local_fool = []
 	
 	if len(fools) > 0:
-		if len(fools) == 1 and random.randint(1, 400) < 399:
+		if len(fools) == 1 and random.randint(1, 1000) < 999:
 			return None
-		elif len(fools) == 2 and random.randint(1, 100) < 99:
+		elif len(fools) == 2 and random.randint(1, 200) < 199:
 			return None
-		elif len(fools) == 3 and random.randint(1, 100) < 98:
+		elif len(fools) == 3 and random.randint(1, 100) < 99:
 			return None
 		elif len(fools) > 3 and random.randint(1, 100) < 97:
 			return None
@@ -126,6 +128,11 @@ def fool_finder(content: str):
 
 
 async def response_director(message: discord.Message):
+	for game in bot_state.active_fireball_sweeper_games:
+		if game['id'] == message.reference.message_id:
+			await fireball_sweeper.response(message)
+			return
+	
 	person = cm.Person(message.author)
 	if person.settings.chat_ignore:
 		return
