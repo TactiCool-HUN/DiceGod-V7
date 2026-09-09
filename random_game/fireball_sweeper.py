@@ -15,7 +15,7 @@ async def start(interaction: discord.Interaction, size: int, difficulty: float):
 	
 	ascii_map: str = ascii_mapping(fire_map, vision_map)
 	
-	sent = await td.send_message(interaction, ascii_map + '\n\nOh no! This coastal dungeon is full of wizards! You are made of wood so you really don\'t want to be hit by a fireball!\nCan you loot all the rooms without finding one with a wizard?\n-# (pst, the numbers show how warm the room is, more heat = more wizards around)\nControls: reply to the message with a map with:\n- ``open a1`` to open 1 square\n- ``flag a1`` to flag a square (flags help you remember where you think wizards are)\n- ``explore a1`` to use "open" on ALL *non-flagged* square around a1 (but not on a1)')
+	sent = await td.send_message(interaction, ascii_map + '\n\nOh no! This coastal dungeon is full of wizards! You are made of wood so you really don\'t want to be hit by a fireball!\nCan you loot all the rooms without finding one with a wizard?\n-# (pst, the numbers show how warm the room is, more heat = more wizards around)\nControls are simple, just write one of these in this channel:\n- ``open a1`` to open 1 square\n- ``flag a1`` to flag a square (flags help you remember where you think wizards are)\n- ``explore a1`` to use "open" on ALL *non-flagged* square around a1 (but not on a1)')
 	
 	bot_state.active_fireball_sweeper_games.append({
 		'id': sent.message_id,
