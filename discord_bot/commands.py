@@ -748,8 +748,8 @@ async def scared_satan(ctx: discord.ext.commands.Context):
 @bot.tree.command(name = "fireball_sweeper", description = "Oh no! The wizards are casting a bunch of fireballs from the coast!")
 @discord.app_commands.choices(size = [
 	discord.app_commands.Choice(name = 'small', value = 8),
-	discord.app_commands.Choice(name = 'medium', value = 16),
-	discord.app_commands.Choice(name = 'large', value = 30),
+	discord.app_commands.Choice(name = 'medium', value = 15),
+	discord.app_commands.Choice(name = 'large', value = 24),
 ])
 @discord.app_commands.choices(difficulty = [
 	discord.app_commands.Choice(name = 'easy', value = 0.1),

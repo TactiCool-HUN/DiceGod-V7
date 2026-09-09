@@ -128,10 +128,14 @@ def fool_finder(content: str):
 
 
 async def response_director(message: discord.Message):
+	learn = True
 	for game in bot_state.active_fireball_sweeper_games:
-		if game['id'] == message.reference.message_id:
+		if message.reference and game['id'] == message.reference.message_id:
 			await fireball_sweeper.response(message)
 			return
+		elif game['channel_id'] == message.channel.id and message.content[:4] in ['flag', 'mark', 'open'] or message.content[:7] == 'explore':
+			await fireball_sweeper.response(message, game['id'])
+			learn = False
 	
 	person = cm.Person(message.author)
 	if person.settings.chat_ignore:
@@ -139,7 +143,7 @@ async def response_director(message: discord.Message):
 
 	# noinspection PyTypeChecker
 	content: str = message.clean_content
-	if message.guild is not None:
+	if message.guild is not None and learn:
 		asyncio.create_task(markov.markov_learner(content, message.guild.id))
 
 	if in_silent_area(message):
