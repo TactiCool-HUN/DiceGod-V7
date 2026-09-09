@@ -70,15 +70,18 @@ async def response(message: discord.Message, game_id: int = -1):
 	
 	ascii_map = ascii_mapping(fire_map, vision_map)
 	if '🔥' in ascii_map:
+		ascii_map = ascii_mapping(fire_map, vision_map, 'game_over')
 		await td.send_message(message, f'{message.author.display_name}: {message.content}\n' + ascii_map + '\n\n# OH NO\nYou found a wizard, RUN FOR YOUR LIVES!!!!\n\*gets fireballed\*')
-		for i, game in enumerate(bot_state.active_fireball_sweeper_games):
+		for game in bot_state.active_fireball_sweeper_games:
 			if game['id'] == game_id:
-				bot_state.active_fireball_sweeper_games.remove(i)
+				bot_state.active_fireball_sweeper_games.remove(game)
+				break
 	elif hidden_spaces + flags == fireballs:
 		await td.send_message(message, f'{message.author.display_name}: {message.content}\n' + ascii_map + '\n\n# VICTORY!\nGo brag about your riches and don\'t forget to buy everyone a round of drinks!')
-		for i, game in enumerate(bot_state.active_fireball_sweeper_games):
+		for game in bot_state.active_fireball_sweeper_games:
 			if game['id'] == game_id:
-				bot_state.active_fireball_sweeper_games.remove(i)
+				bot_state.active_fireball_sweeper_games.remove(game)
+				break
 	else:
 		sent = await td.send_message(message, f'{message.author.display_name}: {message.content}\nFireballs: {fireballs} ({flags} spaces marked)\n' + ascii_map)
 		for game in bot_state.active_fireball_sweeper_games:
@@ -167,7 +170,7 @@ def make_map(size: int, mine_count: int) -> list[list[int]]:
 	return fire_map
 
 
-def ascii_mapping(fire_map: list[list[int]], vision_map: list[list[int]], full_vision: bool = False) -> str:
+def ascii_mapping(fire_map: list[list[int]], vision_map: list[list[int]], vision_type: str = 'game') -> str:
 	nums = ''
 	for i in range(1, len(fire_map) + 1):
 		if i < 10:
@@ -179,14 +182,16 @@ def ascii_mapping(fire_map: list[list[int]], vision_map: list[list[int]], full_v
 		for j, column in enumerate(row):
 			match column:
 				case 0:
-					if not full_vision and vision_map[i][j] == 0:
+					if vision_map[i][j] == 0:
 						final_map += ' ■'
-					elif vision_map[i][j] == 2:
+					elif vision_type == 'game' and vision_map[i][j] == 2:
 						final_map += ' ⚑'
+					elif vision_type == 'game_over' and vision_map[i][j] == 2:
+						final_map += ' X'
 					else:
 						final_map += ' ' + str(neighbour_checker(fire_map, i, j))
 				case 1:
-					if not full_vision and vision_map[i][j] == 0:
+					if vision_type == 'game' and vision_map[i][j] == 0:
 						final_map += ' ■'
 					elif vision_map[i][j] == 2:
 						final_map += ' ⚑'
