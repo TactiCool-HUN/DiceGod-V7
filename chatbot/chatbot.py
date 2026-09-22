@@ -64,8 +64,8 @@ def text_rando(text: str, **kwargs) -> str:
 	return text
 
 
-def stealthifier(content: str, text_to_send: str) -> str:
-	if content[0] == '(' and content[-1] == ')':
+def stealthifier(thread: bool, content: str, text_to_send: str) -> str:
+	if thread or (content[0] == '(' and content[-1] == ')'):
 		text_to_send = '(' + text_to_send + ')'
 
 	return text_to_send
@@ -148,6 +148,7 @@ async def response_director(message: discord.Message):
 
 	if in_silent_area(message):
 		return
+	thread = isinstance(message.channel, discord.Thread)
 	chatty_triggered = False
 
 	if bot.user.mentioned_in(message):
@@ -183,29 +184,29 @@ async def response_director(message: discord.Message):
 				'message.guild.id': message.guild.id,
 				'message': message,
 			})
-		response_list.append(stealthifier(content, response))
+		response_list.append(stealthifier(thread, content, response))
 
 	if '69' in content:
-		response_list.append(stealthifier(content, text_rando('nice')))
+		response_list.append(stealthifier(thread, content, text_rando('nice')))
 	if '*huggies*' in content:
-		response_list.append(stealthifier(content, '*huggies*'))
+		response_list.append(stealthifier(thread, content, '*huggies*'))
 	elif 'huggies' in content:
-		response_list.append(stealthifier(content, 'huggies'))
+		response_list.append(stealthifier(thread, content, 'huggies'))
 	if 'meme' in content:
-		response_list.append(stealthifier(content, text_rando('the DNA of the soul')))
+		response_list.append(stealthifier(thread, content, text_rando('the DNA of the soul')))
 	if 'say what?' in content:
-		response_list.append(stealthifier(content, text_rando('what?', ending_rando = False)))
+		response_list.append(stealthifier(thread, content, text_rando('what?', ending_rando = False)))
 	if 'no u' in content or 'no you' in content and random.randint(1, 5) != 1:
-		response_list.append(stealthifier(content, text_rando('no u')))
+		response_list.append(stealthifier(thread, content, text_rando('no u')))
 	if 'goodbot' in content.lower().replace(' ', ''):
-		response_list.append(stealthifier(content, '<:zorablush:1021403403768844308>'))
+		response_list.append(stealthifier(thread, content, '<:zorablush:1021403403768844308>'))
 	if 'clanker' in content.lower():
-		response_list.append(stealthifier(content, '<:KyrAAAAH:1058349087965065256>'))
-
+		response_list.append(stealthifier(thread, content, '<:KyrAAAAH:1058349087965065256>'))
+	"""
 	temp = fool_finder(content)
 	if temp is not None:
-		response_list.append(stealthifier(content, temp))
-	
+		response_list.append(stealthifier(thread, content, temp))
+	"""
 	if response_list:
 		await td.send_message(message, '\n\n'.join(response_list))
 
