@@ -83,7 +83,7 @@ async def response(message: discord.Message, game_id: int = -1):
 				bot_state.active_fireball_sweeper_games.remove(game)
 				break
 	else:
-		sent = await td.send_message(message, f'{message.author.display_name}: {message.content}\nFireballs: {fireballs} ({flags} spaces marked)\n' + ascii_map)
+		sent = await td.send_message(message, f'{message.author.display_name}: {message.content}\nFireballs: {fireballs} ({flags} spaces marked)\n' + ascii_map + '\n-# - ``open a1`` to open 1 square\n-# - ``flag a1`` to flag a square (flags help you remember where you think wizards are)\n-# - ``explore a1`` to use "open" on ALL *non-flagged* square around a1 (but not on a1)')
 		for game in bot_state.active_fireball_sweeper_games:
 			if game['id'] == game_id:
 				game['id'] = sent.id
