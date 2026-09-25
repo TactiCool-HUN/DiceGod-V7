@@ -222,6 +222,6 @@ async def response_director(message: discord.Message):
 			time = random.randint(0, 3600)
 			await asyncio.sleep(time)
 			cat_url = cat.get_cat()
-			await td.send_message(message, cat_url)
+			await td.send_message(message, cat_url, reply = False, silent = False)
 
 pass
