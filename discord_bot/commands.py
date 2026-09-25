@@ -779,7 +779,7 @@ async def cat_of_the_day(interaction: discord.Interaction):
 
 
 @bot.tree.command(name = "frog_of_the_day", description = "Get your personal frog of the day!")
-async def cat_of_the_day(interaction: discord.Interaction):
+async def frog_of_the_day(interaction: discord.Interaction):
 	person = cm.Person(interaction)
 	last_use = constants.FROG_O_DAY.get(person.db_id, datetime(2000, 1, 1))
 	now = datetime.now()
