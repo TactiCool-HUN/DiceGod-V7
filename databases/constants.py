@@ -9,6 +9,8 @@ SILENT_DB: bool = False
 ALPHABET_UPPER: list[str] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 ALPHABET_LOWER: list[str] = [letter.lower() for letter in ALPHABET_UPPER]
 
+CATS_O_DAY = dict()
+
 EMOJIS = [  # that dicegod likes :3
 	'✨',
 	'❤️',

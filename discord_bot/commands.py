@@ -14,7 +14,9 @@ import discord
 import discord.ext
 import random
 import random_game.fireball_sweeper as fireball_sweeper
-from datetime import timedelta
+from datetime import timedelta, datetime
+import random_game.catget as cat
+import databases.constants as constants
 
 
 @bot.command(name = 'test')
@@ -758,6 +760,20 @@ async def scared_satan(ctx: discord.ext.commands.Context):
 ])
 async def fireball(interaction: discord.Interaction, size: int, difficulty: float):
 	await fireball_sweeper.start(interaction, int(size), float(difficulty))
+
+
+@bot.tree.command(name = "cat_of_the_day", description = "Get your personal cat of the day!")
+async def cat_of_the_day(interaction: discord.Interaction):
+	person = cm.Person(interaction)
+	last_use = constants.CATS_O_DAY.get(person.db_id, datetime(2000, 1, 1))
+	now = datetime.now()
+	
+	if last_use.date() != now.date():
+		await td.send_message(interaction, cat.get_cat(), ephemeral = True, silent = False)
+		constants.CATS_O_DAY[person.db_id] = now
+	else:
+		await td.send_message(interaction, 'HOW DARE YOU REQUEST MORE THAN ONE CAT A DAY?\nDO NOT CROSS ME FOOL.', ephemeral = False, silent = False)
+		await td.send_message(cm.Person(282869456664002581), f'Warning: {person.user.display_name} tried to abuse the cat command.', silent = False)
 
 
 pass
