@@ -10,6 +10,7 @@ import discord
 import asyncio
 import databases.bot_state as bot_state
 import random_game.fireball_sweeper as fireball_sweeper
+import random_game.catget as cat
 
 
 def in_silent_area(message: discord.Message) -> bool:
@@ -19,14 +20,17 @@ def in_silent_area(message: discord.Message) -> bool:
 			'SELECT * FROM silent_areas'
 		)
 		raw = cursor.fetchall()
-
-	for line in raw:
-		if line[2] == 'channel' and message.guild.id == line[1] and message.channel.id == line[0]:
-			return True
-		elif line[2] == 'category' and message.guild.id == line[1] and message.channel.category.id == line[0]:
-			return True
-		elif line[2] == 'guild' and message.guild.id == line[0]:
-			return True
+	
+	try:
+		for line in raw:
+			if line[2] == 'channel' and message.guild.id == line[1] and message.channel.id == line[0]:
+				return True
+			elif line[2] == 'category' and message.guild.id == line[1] and message.channel.category.id == line[0]:
+				return True
+			elif line[2] == 'guild' and message.guild.id == line[0]:
+				return True
+	except AttributeError:
+		return False
 
 	return False
 
@@ -213,5 +217,11 @@ async def response_director(message: discord.Message):
 	if random.randint(1, 250) == 169:
 		await message.add_reaction(t.choice(c.DG_FAVOURITE_EMOJIS))
 
+	if message.guild is None and len(message.attachments) > 0:
+		if random.randint(1, 4) == 1:
+			time = random.randint(0, 3600)
+			await asyncio.sleep(time)
+			cat_url = cat.get_cat()
+			await td.send_message(message, cat_url)
 
 pass
