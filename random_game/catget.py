@@ -15,4 +15,13 @@ def get_cat() -> str:
 	return cat_url
 
 
+def get_frog() -> str:
+	"""
+	:return: frog image url
+	"""
+	response = requests.get("https://frogs.media/api/random")
+	frog_url = response.json()["url"]
+	return frog_url
+
+
 pass

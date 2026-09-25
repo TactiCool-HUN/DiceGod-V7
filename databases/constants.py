@@ -10,6 +10,7 @@ ALPHABET_UPPER: list[str] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '
 ALPHABET_LOWER: list[str] = [letter.lower() for letter in ALPHABET_UPPER]
 
 CATS_O_DAY = dict()
+FROG_O_DAY = dict()
 
 EMOJIS = [  # that dicegod likes :3
 	'✨',

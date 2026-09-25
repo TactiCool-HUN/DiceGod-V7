@@ -8,6 +8,7 @@ import random
 import databases.constants as const
 import utils.tools as t
 import utils.tools_discord as td
+import random_game.catget as cat
 
 
 @bot.event
@@ -147,7 +148,7 @@ async def activity_changer():
 
 		await bot.change_presence(status = discord.Status.online, activity = activity)
 		await asyncio.sleep(timer)
-		# await td.send_message(cm.Person(1030881161796403251), '<a:frogroll:910570184518025216>', silent = False)
+		await td.send_message(cm.Person(1030881161796403251), cat.get_frog(), silent = False)
 
 
 pass

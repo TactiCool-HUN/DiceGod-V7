@@ -768,12 +768,30 @@ async def cat_of_the_day(interaction: discord.Interaction):
 	last_use = constants.CATS_O_DAY.get(person.db_id, datetime(2000, 1, 1))
 	now = datetime.now()
 	
-	if last_use.date() != now.date():
+	if person.user.id == 520697326679883808:  # Anna's infinity pass
+		await td.send_message(interaction, cat.get_cat(), ephemeral = True, silent = False)
+	elif last_use.date() != now.date():
 		await td.send_message(interaction, cat.get_cat(), ephemeral = True, silent = False)
 		constants.CATS_O_DAY[person.db_id] = now
 	else:
 		await td.send_message(interaction, 'HOW DARE YOU REQUEST MORE THAN ONE CAT A DAY?\nDO NOT CROSS ME FOOL.', ephemeral = False, silent = False)
 		await td.send_message(cm.Person(282869456664002581), f'Warning: {person.user.display_name} tried to abuse the cat command.', silent = False)
+
+
+@bot.tree.command(name = "frog_of_the_day", description = "Get your personal frog of the day!")
+async def cat_of_the_day(interaction: discord.Interaction):
+	person = cm.Person(interaction)
+	last_use = constants.FROG_O_DAY.get(person.db_id, datetime(2000, 1, 1))
+	now = datetime.now()
+
+	if last_use.date() != now.date():
+		await td.send_message(interaction, cat.get_frog(), ephemeral = True, silent = False)
+		constants.FROG_O_DAY[person.db_id] = now
+	else:
+		await td.send_message(interaction, 'HOW DARE YOU REQUEST MORE THAN ONE FROG A DAY?\nDO NOT CROSS ME FOOL.', ephemeral = False, silent = False)
+		await td.send_message(cm.Person(282869456664002581), f'Warning: {person.user.display_name} tried to abuse the cat command.', silent = False)
+
+
 
 
 pass
