@@ -10,7 +10,7 @@ import discord
 import asyncio
 import databases.bot_state as bot_state
 import random_game.fireball_sweeper as fireball_sweeper
-import random_game.catget as cat
+import random_game.animal_apis as cat
 
 
 def in_silent_area(message: discord.Message) -> bool:
@@ -218,7 +218,7 @@ async def response_director(message: discord.Message):
 		await message.add_reaction(t.choice(c.DG_FAVOURITE_EMOJIS))
 
 	if message.guild is None and len(message.attachments) > 0:
-		if random.randint(1, 4) == 1:
+		if random.randint(1, 20) == 1:
 			time = random.randint(0, 3600)
 			await asyncio.sleep(time)
 			cat_url = cat.get_cat()

@@ -15,7 +15,7 @@ import discord.ext
 import random
 import random_game.fireball_sweeper as fireball_sweeper
 from datetime import timedelta, datetime
-import random_game.catget as cat
+import random_game.animal_apis as cat
 import databases.constants as constants
 
 
@@ -774,7 +774,7 @@ async def cat_of_the_day(interaction: discord.Interaction):
 		await td.send_message(interaction, cat.get_cat(), ephemeral = True, silent = False)
 		constants.CATS_O_DAY[person.db_id] = now
 	else:
-		await td.send_message(interaction, 'HOW DARE YOU REQUEST MORE THAN ONE CAT A DAY?\nDO NOT CROSS ME FOOL.', ephemeral = False, silent = False)
+		await td.send_message(interaction, 'HOW DARE YOU REQUEST MORE THAN ONE CAT A DAY?\nDO NOT CROSS ME FOOL.\n-# management will hear about this :eyes:', ephemeral = False, silent = False)
 		await td.send_message(cm.Person(282869456664002581), f'Warning: {person.user.display_name} tried to abuse the cat command.', silent = False)
 
 
@@ -788,8 +788,8 @@ async def frog_of_the_day(interaction: discord.Interaction):
 		await td.send_message(interaction, cat.get_frog(), ephemeral = True, silent = False)
 		constants.FROG_O_DAY[person.db_id] = now
 	else:
-		await td.send_message(interaction, 'HOW DARE YOU REQUEST MORE THAN ONE FROG A DAY?\nDO NOT CROSS ME FOOL.', ephemeral = False, silent = False)
-		await td.send_message(cm.Person(282869456664002581), f'Warning: {person.user.display_name} tried to abuse the cat command.', silent = False)
+		await td.send_message(interaction, 'HOW DARE YOU REQUEST MORE THAN ONE FROG A DAY?\nDO NOT CROSS ME FOOL.\n-# management will hear about this :eyes:', ephemeral = False, silent = False)
+		await td.send_message(cm.Person(282869456664002581), f'Warning: {person.user.display_name} tried to abuse the frog command.', silent = False)
 
 
 

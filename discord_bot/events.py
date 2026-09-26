@@ -8,7 +8,7 @@ import random
 import databases.constants as const
 import utils.tools as t
 import utils.tools_discord as td
-import random_game.catget as cat
+import random_game.animal_apis as cat
 
 
 @bot.event
