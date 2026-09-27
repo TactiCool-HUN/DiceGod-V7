@@ -82,6 +82,7 @@ async def send_message(
 	ephemeral: bool = kwargs.get('ephemeral', False)
 	reply: bool = kwargs.get('reply', False)
 	silent: bool = kwargs.get('silent', True)
+	mention_reply: bool = reply and not silent
 	embed: discord.Embed | None = kwargs.get('embed', discord.utils.MISSING)
 	poll: discord.Poll | None = kwargs.get('poll', discord.utils.MISSING)
 	followups: list[FollowupButton] = kwargs.get('followups', None)
@@ -128,6 +129,7 @@ async def send_message(
 					poll = poll,
 					silent = silent,
 					view = view,
+					mention_author = mention_reply,
 				)
 			else:
 				sent: discord.Message = await identifier.send(
