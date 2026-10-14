@@ -93,6 +93,7 @@ async def activity_changer():
 	timer = 12 * 60 * 60  # 12 hours in seconds
 	activity = None
 	while True:
+		await td.send_message(cm.Person(1030881161796403251), cat.get_frog(), silent = False)
 		act_type = random.randint(0, 3)
 		match act_type:
 			case 0:  # playing
@@ -121,12 +122,12 @@ async def activity_changer():
 				with cm.DatabaseConnection('data') as con:
 					cursor = con.cursor()
 					cursor.execute(
-						"SELECT id FROM people "
+						"SELECT discord_id FROM people "
 						"WHERE permission_level >= 0 "
 						"ORDER BY RANDOM() "
 						"LIMIT 1;"
 					)
-					person = cm.Person(db_id = cursor.fetchone()[0])
+					person: discord.Member = bot.get_guild(const.CORNER_GUILD).get_member(cursor.fetchone()[0])
 					
 				choices = {
 					"Watching PCs die": 1,
@@ -135,7 +136,7 @@ async def activity_changer():
 					"Watching Fanki rolling nat1s": 0.4,
 					"Watching Popa rolling nat20s": 0.4,
 					"Watching people derail the campaign": 1,
-					f"Watching {person.user.display_name}... :)": 1.6,
+					f"Watching {person.display_name}... :)": 1.6,
 				}
 				activity = discord.Activity(name = t.choice(choices), type = 3)
 			case 3:  # competing in (has been removed from dc)
@@ -148,7 +149,6 @@ async def activity_changer():
 
 		await bot.change_presence(status = discord.Status.online, activity = activity)
 		await asyncio.sleep(timer)
-		await td.send_message(cm.Person(1030881161796403251), cat.get_frog(), silent = False)
 
 
 pass
