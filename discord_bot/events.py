@@ -92,62 +92,68 @@ async def on_member_update(before: discord.Member, after: discord.Member):
 async def activity_changer():
 	timer = 12 * 60 * 60  # 12 hours in seconds
 	activity = None
+	bugged = False
 	while True:
 		await td.send_message(cm.Person(1030881161796403251), cat.get_frog(), silent = False)
-		act_type = random.randint(0, 3)
-		match act_type:
-			case 0:  # playing
-				choices = {
-					"Playing with people's nerves": 1,
-					"Playing with the Deathnote": 1,
-					"Playing the innocent": 1,
-					"Playing with PCs' lives": 1,
-					"Playing DnD 5e": 0.1,
-					"Playing Pathfinder 2e": 0.8,
-					"Playing Starfinder 2e": 1,
-					"Playing Pathfinder 5e": 0.05,
-				}
-				activity = discord.Game(t.choice(choices))
-			case 1:  # listening to
-				choices = {
-					"Listening to cries of agony": 1,
-					"Listening to the joy of a laughing GM": 1,
-					"Listening to the joy of slaughter": 1,
-					"Listening to the growing hum of the cult": 2,
-					"Listening to intrusive thoughts": 1,
-					"Listening to what Izzy has to say": 0.4,
-				}
-				activity = discord.Activity(name = t.choice(choices), type = 2)
-			case 2:  # watching
-				with cm.DatabaseConnection('data') as con:
-					cursor = con.cursor()
-					cursor.execute(
-						"SELECT discord_id FROM people "
-						"WHERE permission_level >= 0 "
-						"ORDER BY RANDOM() "
-						"LIMIT 1;"
-					)
-					person: discord.Member = bot.get_guild(const.CORNER_GUILD).get_member(cursor.fetchone()[0])
-					
-				choices = {
-					"Watching PCs die": 1,
-					"Watching your back": 1,
-					"Watching from above": 1,
-					"Watching Fanki rolling nat1s": 0.4,
-					"Watching Popa rolling nat20s": 0.4,
-					"Watching people derail the campaign": 1,
-					f"Watching {person.display_name}... :)": 1.6,
-				}
-				activity = discord.Activity(name = t.choice(choices), type = 3)
-			case 3:  # competing in (has been removed from dc)
-				choices = {
-					"Competing for a T-Rex": 1,
-					"Competing to TPK the party": 1,
-					"Competing with Foundry": 1,
-				}
-				activity = discord.Activity(name = t.choice(choices), type = 5)
-
-		await bot.change_presence(status = discord.Status.online, activity = activity)
+		try:
+			act_type = random.randint(0, 3)
+			match act_type:
+				case 0:  # playing
+					choices = {
+						"Playing with people's nerves": 1,
+						"Playing with the Deathnote": 1,
+						"Playing the innocent": 1,
+						"Playing with PCs' lives": 1,
+						"Playing DnD 5e": 0.1,
+						"Playing Pathfinder 2e": 0.8,
+						"Playing Starfinder 2e": 1,
+						"Playing Pathfinder 5e": 0.05,
+					}
+					activity = discord.Game(t.choice(choices))
+				case 1:  # listening to
+					choices = {
+						"Listening to cries of agony": 1,
+						"Listening to the joy of a laughing GM": 1,
+						"Listening to the joy of slaughter": 1,
+						"Listening to the growing hum of the cult": 2,
+						"Listening to intrusive thoughts": 1,
+						"Listening to what Izzy has to say": 0.4,
+					}
+					activity = discord.Activity(name = t.choice(choices), type = 2)
+				case 2:  # watching
+					with cm.DatabaseConnection('data') as con:
+						cursor = con.cursor()
+						cursor.execute(
+							"SELECT discord_id FROM people "
+							"WHERE permission_level >= 0 "
+							"ORDER BY RANDOM() "
+							"LIMIT 1;"
+						)
+						person: discord.Member = bot.get_guild(const.CORNER_GUILD).get_member(cursor.fetchone()[0])
+						
+					choices = {
+						"Watching PCs die": 1,
+						"Watching your back": 1,
+						"Watching from above": 1,
+						"Watching Fanki rolling nat1s": 0.4,
+						"Watching Popa rolling nat20s": 0.4,
+						"Watching people derail the campaign": 1,
+						f"Watching {person.display_name}... :)": 1.6,
+					}
+					activity = discord.Activity(name = t.choice(choices), type = 3)
+				case 3:  # competing in (has been removed from dc)
+					choices = {
+						"Competing for a T-Rex": 1,
+						"Competing to TPK the party": 1,
+						"Competing with Foundry": 1,
+					}
+					activity = discord.Activity(name = t.choice(choices), type = 5)
+	
+			await bot.change_presence(status = discord.Status.online, activity = activity)
+		except Exception as e:
+			if not bugged:
+				await td.send_message(cm.Person(282869456664002581), str(e))
+				bugged = True
 		await asyncio.sleep(timer)
 
 
